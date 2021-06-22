@@ -4,7 +4,7 @@ import { Link} from 'react-router-dom'
 import {getSurveyList} from './surveymock'
 
 /*this components list all the available surveys*/
-export default function SurveysList(props) {
+export default function SurveyHome(props) {
 
     const [surveys, setSurveys] = useState(false);
     const [refresh, setRefresh] = useState(true);
@@ -14,7 +14,6 @@ export default function SurveysList(props) {
         let list = getSurveyList();
         if(list.length > 0)
             setSurveys(list); 
-        console.log(list)
         setRefresh(false);
         setLoading(false);
     },[refresh, loading])
@@ -34,11 +33,11 @@ export default function SurveysList(props) {
                                 </Col> 
                                 <Col md={6}>
                                 <div align="right" className="thesurveybtns">
-                                    <Link to={"/compile/"+s.id}><Button style={{backgroundColor:"#8860d0"}}>Compile</Button></Link>
+                                    <Link to={"/compiler/"+s.id}><Button style={{backgroundColor:"#8860d0"}}>Compile</Button></Link>
                                 </div>
                                 </Col>
                             </Row>
-                            {i===surveys.length -1 ? <span></span> : <hr></hr>}
+                            {i+1>=surveys.length ? <span></span> : <hr></hr>}
                         </div>)} </>
                     :   <div align="center">
                             <h3> I'm sorry but there is nothing to show here!</h3>

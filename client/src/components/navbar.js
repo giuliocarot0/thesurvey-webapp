@@ -10,7 +10,7 @@ function SurveyNavbar(props){
   return(
         <Navbar className="thenavbar" expand="lg" fixed="top"  >
         <Navbar.Brand >
-           <b>TheSurvey</b> {location.pathname.split("/").map(e => {return " / " +e  })}
+           <b>TheSurvey</b> {location.pathname.split("/").map(e => {return  e==="" ?  "" : " / " +e  })}
         </Navbar.Brand>
         <div align="center"></div>
        

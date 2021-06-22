@@ -1,66 +1,36 @@
 import {Col, Container, Button, Form, Row} from 'react-bootstrap'
 import {useState, useEffect} from 'react'
 import {useLocation, Redirect, Link} from 'react-router-dom'
-import QuestionViewer from './QuestionViewer'
-import {getSurvey, fillableSurvey} from './surveymock'
+import {getSurvey, fillableSurvey, filledSurvey} from './surveymock'
 import './components.css'
 
 /*this method display a survey*/
 function SurveyViewer(props) {
-
-    const [survey, setSurvey] = useState(false);
-    const [user, setUser] = useState(false);
-    const [refresh, setRefresh] = useState(true);
-    const location = useLocation();
-    const path = location.pathname.substring(9)
-    const sid = parseInt(path)
-
-    useEffect(()=>{
-        if(!sid){
-            setSurvey(false);
-            setRefresh(false)
-        }
-        else {   
-            let surveyObj = getSurvey(sid);           
-            setSurvey(fillableSurvey(surveyObj)) 
-            setRefresh(false)
-            }
-                  
-    },[refresh,sid])
-
-    const onAnswerChange = (qid, ansid, ansselected, text)=>{
-        for(let q in survey.questions) {
-            if(survey.questions[q].qid === qid && survey.questions[q].multiple)
-                for(let a in survey.questions[q].answers){
-                    if(survey.questions[q].answers[a].aid === parseInt(ansid)){
-                        survey.questions[q].answers[a].selected = ansselected;
-                        console.log(survey)
-
-                    }
-                }
-            else if (survey.questions[q].qid === qid)
-                survey.questions[q].answer = text;
-        }
-    }
+    const {readAnswers, survey, onAnswerChange} = props;
+    const [user, setUser] = useState("");
     
     return(<>
-        
-        {sid ? 
             <Container >
                 <Col className="theviewer" md={{ span: 6, offset: 3 }}>
                     {survey ? <>                             
                         <div align="center"><h2>{survey.title}</h2> <p> <font color="red" >* indicates mandatory fields </font></p></div>
                         <Form> 
                             <Form.Group>
-                                <h4> Please submit your name! <font color="red">*</font></h4>
+                                <h4> Name <font color="red">*</font></h4>
                                 <div className="theanswers">
-                                <Form.Control  type="text" value ={user} onChange={e => {setUser(e.target.value)} }>
-                                </Form.Control></div>
+                                {readAnswers ? 
+                                    <p>{survey.user}</p> 
+                                    :
+                                    <Form.Control  type="text" value ={user} onChange={e => {survey.user = e.target.value; setUser(e.target.value)} }>
+                                
+                                </Form.Control>
+                                }
+                                </div>
                             </Form.Group>
                             <hr></hr>
                         
                             {survey.questions.map((q) => {
-                                return(<QuestionViewer key={q.qid} question={q} answerHandler={onAnswerChange}> </QuestionViewer>) 
+                                return(<QuestionViewer readAnswers={readAnswers} key={q.qid} question={q} answerHandler={onAnswerChange}> </QuestionViewer>) 
                             })}
                         </Form> 
                         </>
@@ -79,13 +49,62 @@ function SurveyViewer(props) {
                 </Col>
                   
             </Container>
-            
-            :
-            <>
-                <Redirect to = "/"></Redirect>
-                <div align="center"><h2>Cannot find the requested survey</h2></div>
-            </>}
     </>)
 }
 
+
+function QuestionViewer(props) {
+    let {question, answerHandler, readAnswers} = props;
+    let [input, setInput] = useState("")
+    const [error, setError] = useState(false)
+
+
+    const validateAndSubmit = (e)=>{
+        setError(false);
+        let a_checked = question.answers.filter(a => a.selected).length
+        console.log(a_checked)
+        if(question.max && e.target.checked && a_checked >= question.max){
+            e.target.checked = false;
+            setError(true);
+        }
+        else
+            answerHandler(question.qid, e.target.id, e.target.checked, null)
+    }
+    return(
+        <>
+                <Form.Group >
+                        <h4>{question.text} {(question.mandatory || question.min>0)? <font color="red">*</font> : ""} </h4>                        
+                        {error ? <font color="red">Max {question.max} answers allowed!</font>:""}
+                
+                        <div className="theanswers">
+                        
+                        {question.multiple? <>
+                            {!readAnswers ? <>
+                                {question.answers.map((a)=>{return( 
+                                <Form.Check type="checkbox" key={"multiple-" + a.aid} id={a.aid} onChange={(e)=> validateAndSubmit(e)} label={a.text}></Form.Check>
+                                )})}
+                                <div align="right"><Form.Text>Minimum answers: {question.min}  Maximum answers: {question.max}</Form.Text></div>   
+                                </> 
+                                :
+                                question.answers.filter(a => a.selected).map((a)=>{return( <li key={a.aid}> {a.text} </li> )}
+                            )}
+                            </>
+                        :   
+                            <> 
+                            {!readAnswers ? 
+                                <>
+                                    <Form.Control as="textarea" maxLength={200} rows={4} value={input} onChange={(e)=>{answerHandler(question.qid, null, null, e.target.value); setInput(e.target.value)}}></Form.Control>
+                                    <div align="right"><Form.Text>Max 200 characters allowed. {input.length}/200</Form.Text> </div>
+                                </>
+                                :
+                                <p> {question.answer}</p> 
+                            }
+                            </>
+                        }
+                    </div>
+                </Form.Group>
+                <hr></hr>
+        </>
+    )
+}
 export default SurveyViewer;
