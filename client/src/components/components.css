@@ -1,0 +1,79 @@
+/*========NAVBAR=========*/
+.thenavbar{ 
+    background-color: rgb(29, 41, 45) !important;
+    position:fixed;
+    width: 100%;
+    z-index:1; 
+    border-radius: 0px;
+}
+
+.navbar-brand{
+    color: rgb(255, 255, 255) !important;
+    font-size: 1.6em;
+}
+
+
+/*===========BODY============*/
+.thebodyofsurvey{
+    padding-top: 7em !important;
+    height: 100% !important;
+    background: rgb(136,96,208);
+    background: linear-gradient(344deg, rgba(132,206,235,0.9808298319327731) 60%, rgba(86,128,233,1) 100%);
+}
+body > #root > div {
+    height: 100vh !important;
+  }
+/*****+SIDEBAR*******/
+.bigsidebar { 
+    height: 100%;
+    background-color: #464866;
+    margin: 5px;
+}
+
+/*==============SurveyViewer/SurveyList===============*/
+
+.theviewer {
+    display: block;
+    padding: 25px;
+    margin: 10px 10px 0 0;
+    background-color: white;
+    border-radius: 10px;
+    width: 100%;
+    height: 80vh;
+    overflow-y: scroll
+    
+}
+.list{
+    margin: 0px;
+}
+.thebuttonbox {
+    margin: 0px;
+    padding-top: 82vh;
+}
+.thesurveybtns{
+    vertical-align: middle;
+}
+.backbtn {
+    margin-right: 3px;
+    background-color: white;
+    color: black;
+}
+
+.home {
+    padding: 5px !important;
+}
+
+/*=============QuestionViewer================*/
+.thequestions { 
+    margin: 20px;
+    padding: 30px !important;
+   
+}
+.theanswers{
+    margin: 30px;
+}
+
+label{
+    margin-left: 10px;
+    font-weight: 400 !important;
+}

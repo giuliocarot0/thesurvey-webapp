@@ -1,24 +1,26 @@
-import logo from './logo.svg';
-import './App.css';
-
+import {BrowserRouter as Router, Route } from 'react-router-dom';
+import SurveyNavbar from './components/navbar';
+import SurveysList from './components/SurveysList'
+import SurveyViewer from './components/SurveyViewer'
+import Sidebar from './components/Sidebar'
+import {Container} from 'react-bootstrap'
+import {getSurvey, fillableSurvey} from './components/surveymock'
+import './components/components.css'
+require('bootstrap')
 function App() {
-  return (
-    <div className="App">
-      <header className="App-header">
-        <img src={logo} className="App-logo" alt="logo" />
-        <p>
-          Edit <code>src/App.js</code> and save to reload.
-        </p>
-        <a
-          className="App-link"
-          href="https://reactjs.org"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          Learn React
-        </a>
-      </header>
-    </div>
+  return ( 
+      <>
+      <Router>
+        <SurveyNavbar></SurveyNavbar>
+        <Container fluid className="thebodyofsurvey">
+          <Route exact path="/login"> This is the login page </Route>
+          <Route path="/home"><SurveysList></SurveysList></Route>
+          <Route exact path="/create"></Route>
+          <Route path="/compile"> <SurveyViewer></SurveyViewer></Route>
+        </Container>
+      </Router>
+      
+    </>
   );
 }
 
