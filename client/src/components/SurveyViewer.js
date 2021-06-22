@@ -26,7 +26,7 @@ function SurveyViewer(props) {
             setRefresh(false)
             }
                   
-    },[refresh])
+    },[refresh,sid])
 
     const onAnswerChange = (qid, ansid, ansselected, text)=>{
         for(let q in survey.questions) {
@@ -48,28 +48,26 @@ function SurveyViewer(props) {
         {sid ? 
             <Container >
                 <Col className="theviewer" md={{ span: 6, offset: 3 }}>
-                    {survey ? <>
-                              
+                    {survey ? <>                             
                         <div align="center"><h2>{survey.title}</h2> <p> <font color="red" >* indicates mandatory fields </font></p></div>
                         <Form> 
                             <Form.Group>
                                 <h4> Please submit your name! <font color="red">*</font></h4>
                                 <div className="theanswers">
-                                <Form.Control  type="text">
+                                <Form.Control  type="text" value ={user} onChange={e => {setUser(e.target.value)} }>
                                 </Form.Control></div>
                             </Form.Group>
                             <hr></hr>
                         
                             {survey.questions.map((q) => {
-                                return(<QuestionViewer question={q} answerHandler={onAnswerChange}> </QuestionViewer>) 
+                                return(<QuestionViewer key={q.qid} question={q} answerHandler={onAnswerChange}> </QuestionViewer>) 
                             })}
                         </Form> 
                         </>
                         : 
                         <h3>Cannot find the requested survey</h3>}
-                </Col>
-                    <Row className="thebuttonbox">
-                        <Link to="/home" >
+                          <Row className="thebuttonbox">
+                        <Link to="/" >
                             <Button variant="primary" className="backbtn" type="" >
                                 { "< Back"}
                             </Button>
@@ -78,6 +76,8 @@ function SurveyViewer(props) {
                             Submit
                         </Button> :""}                              
                     </Row>
+                </Col>
+                  
             </Container>
             
             :
