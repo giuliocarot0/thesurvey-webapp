@@ -1,16 +1,16 @@
 import {Col, Container, Button, Form, Row} from 'react-bootstrap'
-import {useState, useEffect} from 'react'
-import {useLocation, Redirect, Link} from 'react-router-dom'
-import {getSurvey, fillableSurvey, filledSurvey} from './surveymock'
+import {useState} from 'react'
+import {Link} from 'react-router-dom'
+
 import './components.css'
 
 /*this method display a survey*/
 function SurveyViewer(props) {
-    const {readAnswers, survey, onAnswerChange} = props;
+    const {readAnswers, survey, onAnswerChange, onUserSet} = props;
     const [user, setUser] = useState("");
     
     return(<>
-            <Container >
+            <Container >  
                 <Col className="theviewer" md={{ span: 6, offset: 3 }}>
                     {survey ? <>                             
                         <div align="center"><h2>{survey.title}</h2> <p> <font color="red" >* indicates mandatory fields </font></p></div>
@@ -21,7 +21,7 @@ function SurveyViewer(props) {
                                 {readAnswers ? 
                                     <p>{survey.user}</p> 
                                     :
-                                    <Form.Control  type="text" value ={user} onChange={e => {survey.user = e.target.value; setUser(e.target.value)} }>
+                                    <Form.Control  type="text" value ={user} onChange={e => {onUserSet(e.target.value); setUser(e.target.value)} }>
                                 
                                 </Form.Control>
                                 }
@@ -42,7 +42,7 @@ function SurveyViewer(props) {
                                 { "< Back"}
                             </Button>
                         </Link> 
-                        {survey? <Button variant="primary" type="">
+                        {survey && !readAnswers? <Button variant="primary" type="">
                             Submit
                         </Button> :""}                              
                     </Row>

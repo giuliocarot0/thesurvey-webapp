@@ -80,3 +80,14 @@ label{
     margin-left: 10px;
     font-weight: 400 !important;
 }
+
+/***studio***/
+
+.editor{
+    padding:40px;
+    background-color: #d8d8d8;
+}
+
+.form-group{
+    padding: 5px;
+}

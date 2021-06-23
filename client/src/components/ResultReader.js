@@ -1,8 +1,8 @@
 import SurveyViewer from './SurveyViewer'
-import {Col, Container, Button, Form, Row} from 'react-bootstrap'
+import {Col, Container, Button} from 'react-bootstrap'
 import {useState, useEffect} from 'react'
-import {useLocation, Redirect, Link} from 'react-router-dom'
-import {getSurvey, fillableSurvey, filledSurveys} from './surveymock'
+import {useLocation} from 'react-router-dom'
+import {getSurvey, filledSurveys} from './surveymock'
 
 export default function ResultReader(props){
     const [surveys, setSurveys] = useState(false);

@@ -1,12 +1,10 @@
 import SurveyViewer from './SurveyViewer'
-import {Col, Container, Button, Form, Row} from 'react-bootstrap'
 import {useState, useEffect} from 'react'
-import {useLocation, Redirect, Link} from 'react-router-dom'
-import {getSurvey, fillableSurvey, filledSurvey} from './surveymock'
+import {useLocation} from 'react-router-dom'
+import {getSurvey, fillableSurvey} from './surveymock'
 
 export default function SurveyCompiler(props){
     const [survey, setSurvey] = useState(false);
-    const [user, setUser] = useState("");
     const [refresh, setRefresh] = useState(true);
     const location = useLocation();
     
@@ -21,7 +19,6 @@ export default function SurveyCompiler(props){
         else {   
             let surveyObj = getSurvey(sid);           
             setSurvey(fillableSurvey(surveyObj)) 
-            console.log(surveyObj)
             setRefresh(false)
             }
                   
@@ -40,9 +37,13 @@ export default function SurveyCompiler(props){
         }
     }
 
+    const userSetter = (user)=>{
+        survey.user = user;
+    }
+
     return (
         <>  
-            <SurveyViewer onAnswerChange={onAnswerChange} survey={survey}></SurveyViewer>
+            <SurveyViewer onAnswerChange={onAnswerChange} onUserSet={userSetter} survey={survey}></SurveyViewer>
         </>
     )
 

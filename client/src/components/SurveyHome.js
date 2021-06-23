@@ -21,15 +21,18 @@ export default function SurveyHome(props) {
     return (<>
         {loading ? "Please wait while the content loads!" :<>
             <Container className="home">
-             {surveys ? <div className="homeHeader"><h2>Choose a survey to start!</h2></div>: "" }
-
+             {surveys ? 
+                 <Col className="theviewer" align="center" md={{ span: 6, offset: 3 }}> 
+                 <h4>TheSurvey Home</h4>
+                 Select one of the following surveys to start! The compiler will guide you step by step.
+                </Col>: "" }
                 <Col className="theviewer list" md={{ span: 9, offset: 0 }}>
                     {surveys ? <>
                         {surveys.map((s, i) =>
                         <div key={s.id}>  
                             <Row>
                                 <Col md={6}>
-                                    <h4>{s.title}</h4> 
+                                    <h5>{s.title}</h5> 
                                 </Col> 
                                 <Col md={6}>
                                 <div align="right" className="thesurveybtns">
