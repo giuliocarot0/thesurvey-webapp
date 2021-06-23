@@ -44,5 +44,14 @@ const getSurveyList = ()=>{
         })
         return [{sid: s.id, title: s.title, questions:questions, user:"Attilio"},{sid: s.id, title: s.title, questions:questions, user:"Riccardo"},{sid: s.id, title: s.title, questions:questions, user:"Pasquale"}];
     }
-module.exports = {getSurvey, fillableSurvey,getSurveyList, filledSurveys }
 
+
+const createOpenQuestion = (qid, text, mandatory) =>{
+    return {"multiple":false,"qid":qid,"text":text,"mandatory":mandatory,answer:"","order":qid}
+}
+
+const createClosedQuestion = (qid, text, min, max, answers) =>{
+    return {"multiple":true,"qid":qid,"text":text,"answers":answers,"min":min,"max":max,"order":qid}
+}
+
+module.exports = {getSurvey, fillableSurvey,getSurveyList, filledSurveys, createClosedQuestion, createOpenQuestion }
