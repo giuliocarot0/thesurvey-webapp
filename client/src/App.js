@@ -3,7 +3,7 @@ import SurveyNavbar from './components/navbar';
 import SurveyHome from './components/SurveyHome'
 import SurveyEditor from './components/SurveyEditor'
 import SurveyDashboard from './components/SurveyDashboard'
-
+import Login from './components/Login'
 import {Container} from 'react-bootstrap'
 import './components/components.css'
 import ResultReader from './components/ResultReader';
@@ -16,7 +16,7 @@ function App() {
       <Router>
         <SurveyNavbar></SurveyNavbar>
         <Container fluid className="thebodyofsurvey">
-          <Route exact path="/login"> This is the login page </Route>
+          <Route exact path="/login"><Login></Login></Route>
           <Route exact path="/"><SurveyHome></SurveyHome></Route>
           <Route exact path="/dashboard"><SurveyDashboard></SurveyDashboard></Route>
           <Route exact path="/create"><SurveyEditor></SurveyEditor> </Route>
