@@ -37,7 +37,7 @@ function SurveyViewer(props) {
                         : 
                         <h3>Cannot find the requested survey</h3>}
                           <Row className="thebuttonbox">
-                        <Link to="/" >
+                        <Link to={readAnswers ? "/dashboard" : "/"} >
                             <Button variant="primary" className="backbtn" type="" >
                                 { "< Back"}
                             </Button>

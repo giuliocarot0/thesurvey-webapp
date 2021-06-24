@@ -15,7 +15,13 @@ const getSurveyList = ()=>{
             {"id":3, "title":"Organizzazione escursione San Lorenzo"}
         ]
     }
-
+const getMySurveyList = ()=>{
+        return [
+                {"id":1, "title":"Questionario di prova", "submissions": 3},
+                {"id":2, "title":"Proposte per il 15 Agosto", "submissions": 3},
+                {"id":3, "title":"Organizzazione escursione San Lorenzo", "submissions": 3}
+            ]
+        }
   /*this method prepare an array to input answers*/
   const fillableSurvey = (s) => {
     let questions = []
@@ -54,4 +60,4 @@ const createClosedQuestion = (qid, text, min, max, answers) =>{
     return {"multiple":true,"qid":qid,"text":text,"answers":answers,"min":min,"max":max,"order":qid}
 }
 
-module.exports = {getSurvey, fillableSurvey,getSurveyList, filledSurveys, createClosedQuestion, createOpenQuestion }
+module.exports = {getSurvey, fillableSurvey,getSurveyList,getMySurveyList, filledSurveys, createClosedQuestion, createOpenQuestion }
