@@ -84,7 +84,7 @@ export default function SurveyEditor(props){
                                <QuestionViewer questionPreview  question={q}></QuestionViewer>
                             </div>)
                             })}
-                            <a href="#add" onClick={()=>setAddForm(!addForm)}>{addForm ? "x Close":"+ Add a question"}</a>
+                            <Button variant="link" href={""} onClick={()=>setAddForm(!addForm)}>{addForm ? "x Close":"+ Add a question"}</Button>
                             {addForm ? <QuestionEditor onClose={()=>{setAddForm(false)}} addQuestion={createNewQuestion} ></QuestionEditor> : ""}
 
                         </div>
@@ -125,6 +125,7 @@ function QuestionEditor(props){
     const [answers, setAnswers] = useState(["","","","","","","","","",""]);
     const [mandatory, setMandatory] = useState(false);
     const [error, setError] = useState(false);
+    const [activeAnswers, setActiveAnswers] = useState(1)
 
     const editAnswer = (id, text) => {
         answers[id - 1] = text;
@@ -203,26 +204,16 @@ function QuestionEditor(props){
                 {type==="Multiple" ? <>
                 <h4>Answers</h4>
                 <Form.Group>
-                    <Form.Text>Answer 1</Form.Text>
-                    <Form.Control value={answers[0]} type="text" key={1} id={1} onChange={(e)=>{editAnswer(e.target.id,e.target.value)}}></Form.Control>
-                    <Form.Text>Answer 2</Form.Text>
-                    <Form.Control value={answers[1]} type="text" key={2} id={2} onChange={(e)=>{editAnswer(e.target.id,e.target.value)}}></Form.Control>
-                    <Form.Text>Answer 3</Form.Text>
-                    <Form.Control value={answers[2]} type="text" key={3} id={3} onChange={(e)=>{editAnswer(e.target.id,e.target.value)}}></Form.Control>
-                    <Form.Text>Answer 4</Form.Text>
-                    <Form.Control value={answers[3]} type="text" key={4} id={4} onChange={(e)=>{editAnswer(e.target.id,e.target.value)}}></Form.Control>
-                    <Form.Text>Answer 5</Form.Text>
-                    <Form.Control value={answers[4]} type="text" key={5} id={5} onChange={(e)=>{editAnswer(e.target.id,e.target.value)}}></Form.Control>
-                    <Form.Text>Answer 6</Form.Text>
-                    <Form.Control value={answers[5]} type="text" key={6} id={6} onChange={(e)=>{editAnswer(e.target.id,e.target.value)}}></Form.Control>
-                    <Form.Text>Answer 7</Form.Text>
-                    <Form.Control value={answers[6]} type="text" key={7} id={7} onChange={(e)=>{editAnswer(e.target.id,e.target.value)}}></Form.Control>
-                    <Form.Text>Answer 8</Form.Text>
-                    <Form.Control value={answers[7]} type="text" key={8} id={8} onChange={(e)=>{editAnswer(e.target.id,e.target.value)}}></Form.Control>
-                    <Form.Text>Answer 9</Form.Text>
-                    <Form.Control value={answers[8]} type="text" key={9} id={9} onChange={(e)=>{editAnswer(e.target.id,e.target.value)}}></Form.Control>
-                    <Form.Text>Answer 10</Form.Text>
-                    <Form.Control value={answers[9]} type="text" key={10} id={10} onChange={(e)=>{editAnswer(e.target.id,e.target.value)}}></Form.Control>
+                    {answers.map((a,i) => { return(
+                    i<activeAnswers &&
+                        <>
+                        <Form.Text>Answer {i+1}</Form.Text>
+                        <Form.Control value={answers[i]} type="text" key={i+1} id={i+1} onChange={(e)=>{editAnswer(e.target.id,e.target.value)}}></Form.Control>
+                        </>
+                    
+                    )})}
+                    <Button variant="link" onClick={()=>{setActiveAnswers(i=>i+1)}}>Add an answer</Button>
+                   
                 
                 </Form.Group> 
                 </>
