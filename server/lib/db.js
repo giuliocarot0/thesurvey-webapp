@@ -2,12 +2,12 @@ const sqlite3 = require('sqlite3').verbose();
 
 //create a db object;
 
-let db = new sqlite3.Database('./survey.db', (err) => {
+let db = new sqlite3.Database('./survey_dk.db', (err) => {
     if(err) {
         return console.error(err.message);
     }
     else
-        console.log("DB successfully connected to TaskAPI");
+        console.log("DB successfully connected to SURVEY_API");
 })
 
 
