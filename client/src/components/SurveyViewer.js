@@ -6,7 +6,7 @@ import './components.css'
 
 /*this method display a survey*/
 function SurveyViewer(props) {
-    const {readAnswers, survey, onAnswerChange, onUserSet} = props;
+    const {readAnswers, survey, onAnswerChange, onUserSet, onSubmit} = props;
     const [user, setUser] = useState("");
     
     return(<>
@@ -42,7 +42,7 @@ function SurveyViewer(props) {
                                 { "< Back"}
                             </Button>
                         </Link> 
-                        {survey && !readAnswers? <Button variant="primary" type="">
+                        {survey && !readAnswers? <Button variant="primary" onClick={()=>{onSubmit()}}type="">
                             Submit
                         </Button> :""}                              
                     </Row>

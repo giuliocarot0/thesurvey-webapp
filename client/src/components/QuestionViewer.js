@@ -12,7 +12,6 @@ export default function QuestionViewer(props) {
     const validateAndSubmit = (e)=>{
         setError(false);
         let a_checked = question.answers.filter(a => a.selected).length
-        console.log(a_checked)
         if(question.max && e.target.checked && a_checked >= question.max){
             e.target.checked = false;
             setError(true);

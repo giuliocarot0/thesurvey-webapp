@@ -1,5 +1,5 @@
 import './components.css'
-import {Col, Container, Form, Button, Row, Alert, Image} from 'react-bootstrap'
+import {Col, Container, Form, Button, Row, Alert} from 'react-bootstrap'
 import {useState} from 'react'
 import {Link} from 'react-router-dom'
 import {createOpenQuestion, createClosedQuestion} from './surveymock'

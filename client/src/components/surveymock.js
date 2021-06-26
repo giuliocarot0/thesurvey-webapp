@@ -29,26 +29,34 @@ const getMySurveyList = ()=>{
      s.questions.map((q) => {
         if(q.multiple){
             let answers = q.answers.map((a) => {return {aid: a.answer_id, text: a.text, selected: false}});
+            answers.sort((a,b) => a.aid - b.aid)
             return questions.push({qid: q.id, multiple: true, text: q.text, min: q.min, max:q.max, answers: answers})
         }
         else    
             return questions.push({qid: q.id, text: q.text, madatory: q.mandatory, answer:""});
     })
+    questions.sort((a,b) => a.qid - b.qid)
     return {sid: s.id, title: s.title, questions:questions, user:""};
 }
 
-    const filledSurveys = (s) => {
-        let questions = []
-        if(!s) return false;
-         s.questions.map((q) => {
-            if(q.multiple){
-                let answers = q.answers.map((a) => {return {aid: a.answer_id, text: a.text, selected: true}});
-                return questions.push({qid: q.id, multiple: true, text: q.text, min: q.min, max:q.max, answers: answers})
+    const filledSurvey = (survey, a, p) => {
+        let s = JSON.parse(JSON.stringify(survey))
+        //assuming s a fillableSurvey
+        for(let e in a){
+            if(a[e].text){
+                s.questions[a[e].question_id - 1].answer = a[e].text;
             }
-            else    
-                return questions.push({qid: q.id, text: q.text, madatory: q.mandatory, answer:"Penso che sia importante"});
-        })
-        return [{sid: s.id, title: s.title, questions:questions, user:"Attilio"},{sid: s.id, title: s.title, questions:questions, user:"Riccardo"},{sid: s.id, title: s.title, questions:questions, user:"Pasquale"}];
+            else{ 
+                s.questions[a[e].question_id - 1 ].answers[a[e].answer_id  - 1].selected = true;           
+            }
+        }
+        s.user = p;
+        return s;
+    }
+
+    const filledSurveys = (s, a) => {
+        let survey = {sid: s.id, title: s.title, questions: s.questions, user: a.partecipant}
+        return survey
     }
 
 
@@ -60,4 +68,4 @@ const createClosedQuestion = (qid, text, min, max, answers) =>{
     return {"multiple":true,"qid":qid,"text":text,"answers":answers,"min":min,"max":max,"order":qid}
 }
 
-module.exports = {getSurvey, fillableSurvey,getSurveyList,getMySurveyList, filledSurveys, createClosedQuestion, createOpenQuestion }
+module.exports = {getSurvey, fillableSurvey,getSurveyList,getMySurveyList, filledSurvey, createClosedQuestion, createOpenQuestion }

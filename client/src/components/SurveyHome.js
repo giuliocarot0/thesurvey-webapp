@@ -1,7 +1,7 @@
 import {Col, Container, Button, Row} from 'react-bootstrap'
 import {useState, useEffect} from 'react'
 import { Link} from 'react-router-dom'
-import {getSurveyList} from './surveymock'
+import API from '../API'
 
 /*this components list all the available surveys*/
 export default function SurveyHome(props) {
@@ -11,13 +11,22 @@ export default function SurveyHome(props) {
     const [loading, setLoading] = useState(true);
 
     useEffect(()=>{
-        let list = getSurveyList();
-        if(list.length > 0)
-            setSurveys(list); 
-        setRefresh(false);
-        setLoading(false);
+        API.getSurveyList()
+            .then( list => {
+                if(list.length > 0)
+                    setSurveys(list)
+                setRefresh(false)
+                setLoading(false)
+            })
+            .catch((err) => {
+                //TODO: error handling here
+                setRefresh(false);
+                setLoading(false);
+            })
+       
     },[refresh, loading])
 
+   
     return (<>
         {loading ? "Please wait while the content loads!" :<>
             <Container className="home">

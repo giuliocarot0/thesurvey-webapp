@@ -2,17 +2,29 @@
 import {useState, useEffect} from 'react'
 import {Col, Container, Button, Row} from 'react-bootstrap'
 import {Link} from 'react-router-dom'
-import {getMySurveyList} from './surveymock'
+import API from '../API'
+
 export default function SurveyDashboard(props){
-    const [user, setUser] = useState("Giulio")
+    const user = "Giulio"
     const [mySurveys, setMySurveys] = useState(false)
     const [refresh, setRefresh] = useState(true)
+    const [loading, setLoading] = useState(true)
 
     useEffect(()=>{
-        let surveys = getMySurveyList();
-        setMySurveys(surveys)
-        setRefresh(false)
-    },[refresh])
+        API.getSurveyList()
+            .then( list => {
+                if(list.length > 0)
+                    setMySurveys(list)
+                setRefresh(false)
+                setLoading(false)
+            })
+            .catch((err) => {
+                //TODO: error handling here
+                setRefresh(false);
+                setLoading(false);
+            })
+       
+    },[refresh, loading])
 
     return (
         <Container>
@@ -32,7 +44,7 @@ export default function SurveyDashboard(props){
                         </Col> 
                         <Col md={6}>
                         <div align="right" className="thesurveybtns">
-                            Total submissions: {s.submissions}
+                            Total submissions: {s.submission}
                             &nbsp;
                             &nbsp;
                             <Link to={"/reader/"+s.id}><Button style={{backgroundColor:"#8860d0"}}>Check</Button></Link>
