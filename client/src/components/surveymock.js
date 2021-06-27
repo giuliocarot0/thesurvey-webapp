@@ -31,11 +31,6 @@
         return s;
     }
 
-    const filledSurveys = (s, a) => {
-        let survey = {sid: s.id, title: s.title, questions: s.questions, user: a.partecipant}
-        return survey
-    }
-
 
 const createOpenQuestion = (qid, text, mandatory) =>{
     return {"multiple":false,"qid":qid,"text":text,"mandatory":mandatory, answer:""}
