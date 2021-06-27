@@ -48,5 +48,15 @@ const submitEntries = async (form) =>{
         body: JSON.stringify(form)
     }))
 }
-const API = {getSurveyList, getSurvey, getSubmissionForSurvey, getPartecipants, submitEntries}
+
+const createSurvey = async (survey) => {
+    return responseParser(fetch(BASEURL + '/surveys/', {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json'
+        },
+        body: JSON.stringify(survey)
+    }))
+}
+const API = {getSurveyList, getSurvey, getSubmissionForSurvey, getPartecipants, submitEntries, createSurvey}
 export default API
