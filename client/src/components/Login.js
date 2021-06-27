@@ -1,8 +1,37 @@
-import {Form, Container, Button, Col} from 'react-bootstrap'
+import {Form, Container, Button, Col, Spinner} from 'react-bootstrap'
 import {Redirect} from 'react-router-dom'
+import {useState} from 'react'
+import API from '../API'
 
 export default function Login(props){
     const {onLogin, loggedIn} = props
+    const [loading, setLoading] = useState(false)
+    const [error, setError] = useState(false)
+    const [username, setUsername] = useState("")
+    const [password, setPassword] = useState("")
+
+    const handleSubmit = (e)=>{
+        e.preventDefault();
+        setLoading(true);
+        if(validateFields(username, password)){
+            let credentials = {username, password}
+            API.login(credentials)
+                .then((a) =>{
+                    setLoading(false)
+                    onLogin(a)
+                    setError(false)
+                })
+                .catch(e =>{
+                    setLoading(false)
+                    setError(true)
+                })
+        }
+    }
+    const validateFields = (e,p)=>{
+        /*ADD VALIDATION HERE*/
+        return true;
+    }
+
     return(<>
         {loggedIn && <Redirect to="/dashboard"/>}
         <Container>
@@ -10,24 +39,28 @@ export default function Login(props){
                  <h4>TheSurvey Login</h4>
                  Login with your username and password to create surveys and manage them!
                 </Col>
+
             <Col className="theviewer" md={{span:6, offset:3}}>
                 <Form>
                     <Form.Group controlId="formBasicEmail">
                         <Form.Label>Email address</Form.Label>
-                        <Form.Control type="email" placeholder="Enter email" />
+                        <Form.Control value = {username} onChange={(e)=>{setUsername(e.target.value)}}type="email" placeholder="Enter email" />
                     </Form.Group>
 
                     <Form.Group controlId="formBasicPassword">
                         <Form.Label>Password</Form.Label>
-                        <Form.Control type="password" placeholder="Password" />
+                        <Form.Control value = {password} onChange={(e)=>{setPassword(e.target.value)}} type="password" placeholder="Password" />
                     </Form.Group>
                     <div align="right"> 
-                    <Button variant="primary" onClick={()=>onLogin()}>
-                        Login
+                    {error && <font color="red" style={{margin: "30px"}}> Cannot login, please check username and password!</font>}
+                    <Button variant="primary" disabled={loading} onClick={handleSubmit}>
+                        {loading ? 
+                            "Loading..."
+                            : "Login" }
                     </Button>
                     </div>
                 </Form>
             </Col>    
-        </Container>>
+        </Container>
     </>)
 }

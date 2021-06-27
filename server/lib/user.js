@@ -1,5 +1,5 @@
 
-const db = require('/db')
+const db = require('./db')
 const bcrypt = require('bcrypt')
 
 exports.get =(email, password)=>{
@@ -9,42 +9,40 @@ exports.get =(email, password)=>{
             if(err)
                 reject(err)
             else if (row === undefined)
-                resolve({error: "User not found"})
+                resolve(false)
             else {
                 let response = { 
                     user:  {
-                        id: row.id,
-                        username: row.email,
+                        id: row.user_id,
+                        username: row.username,
                         name: row.name
                     }}
-                    
+               
                 //verify whether the password is correct or not
                 bcrypt.compare(password, row.hash).then( result => { 
                     if(result)
                         resolve(response)
                     else 
-                        resolve({error: "Wrong password!"})
+                        resolve(false)
                 })
             }
             
         })
     })
 }
-exports.getById =(id)=>{
+exports.getUserById =(id)=>{
     return new Promise((resolve, reject)=> {
         const sql = "SELECT * FROM USER WHERE user_id = ?"
         db.get(sql, [id], (err, row) => {
             if(err)
                 reject(err)
             else if (row === undefined)
-                resolve({error: "User Not Found"})
+                reject({error: "User not found"})
             else
                 resolve({
-                    user:  {
-                        id: row.id,
-                        username: row.email,
+                        id: row.user_id,
+                        username: row.username,
                         name: row.name
-                    }
                 })
         })
     })
