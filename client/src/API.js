@@ -58,5 +58,24 @@ const createSurvey = async (survey) => {
         body: JSON.stringify(survey)
     }))
 }
-const API = {getSurveyList, getSurvey, getSubmissionForSurvey, getPartecipants, submitEntries, createSurvey}
+
+const login = async (credentials) => {
+    return responseParser(fetch(BASEURL+ '/sessions', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(credentials),
+      }))
+}
+
+const logout = async ()=>{
+    await fetch('/api/sessions/current', { method: 'DELETE' });
+}
+
+const getUserInfo = async () => {
+    return responseParser(fetch(BASEURL + '/sessions/current'))
+}
+
+const API = {getSurveyList, getSurvey, getSubmissionForSurvey, getPartecipants, submitEntries, createSurvey, login, logout, getUserInfo}
 export default API
