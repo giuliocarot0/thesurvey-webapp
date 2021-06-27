@@ -4,7 +4,7 @@ import './components.css'
 
 
 function SurveyNavbar(props){
-
+  const {loggedIn, onLogout} = props;
   const location = useLocation();
 
   return(
@@ -15,9 +15,14 @@ function SurveyNavbar(props){
         </Navbar.Brand>
         </Col>
         <Col md={6} align="right">
-        {location.pathname !== "/login"  &&  <Link to="login"> 
-            <Button style={{margin:"5px"}}> Login</Button>
-            </Link>}
+        {location.pathname !== "/login"  && <> { !loggedIn? 
+          <Link to="login"> 
+            <Button style={{margin:"5px"}}> {"Login"}</Button>
+          </Link> 
+          : 
+          <Button style={{margin:"5px"}} onClick={()=>{onLogout()}}> {"Logout"}</Button>
+        } 
+        </>}      
         </Col> 
   </Navbar>
 )

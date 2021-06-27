@@ -1,7 +1,10 @@
 import {Form, Container, Button, Col} from 'react-bootstrap'
+import {Redirect} from 'react-router-dom'
 
 export default function Login(props){
+    const {onLogin, loggedIn} = props
     return(<>
+        {loggedIn && <Redirect to="/dashboard"/>}
         <Container>
             <Col className="theviewer" align="center" md={{ span: 6, offset: 3 }}> 
                  <h4>TheSurvey Login</h4>
@@ -19,7 +22,7 @@ export default function Login(props){
                         <Form.Control type="password" placeholder="Password" />
                     </Form.Group>
                     <div align="right"> 
-                    <Button variant="primary" type="submit">
+                    <Button variant="primary" onClick={()=>onLogin()}>
                         Login
                     </Button>
                     </div>
