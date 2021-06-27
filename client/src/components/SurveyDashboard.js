@@ -3,19 +3,21 @@ import {useState, useEffect} from 'react'
 import {Col, Container, Button, Row} from 'react-bootstrap'
 import {Link, Redirect} from 'react-router-dom'
 import API from '../API'
+import LoadingComponent from './LoadingComponent'
 
 export default function SurveyDashboard(props){
-    const user = "Giulio"
     const {loggedIn} = props;
     const [mySurveys, setMySurveys] = useState(false)
     const [refresh, setRefresh] = useState(true)
     const [loading, setLoading] = useState(true)
 
+  
+    
+
     useEffect(()=>{
         API.getSurveyList()
-            .then( list => {
-                if(list.length > 0)
-                    setMySurveys(list)
+            .then((list) => {               
+                setMySurveys(list)
                 setRefresh(false)
                 setLoading(false)
             })
@@ -24,19 +26,20 @@ export default function SurveyDashboard(props){
                 setRefresh(false);
                 setLoading(false);
             })
-       
-    },[refresh, loading])
+    },[refresh])
 
     return (<>
         {!loggedIn && <Redirect to="/login"/>}
+        {loading ? <LoadingComponent></LoadingComponent> :
+        <>
         <Container>
              <Col className="theviewer" align="center" md={{ span: 6, offset: 3 }}> 
-                 <h4>{loggedIn.username}'s Dashboard</h4>
-                 {user}, starting from here you can create new surveys and check submissions.
+                 <h4>{loggedIn.name}'s Dashboard</h4>
+                 {loggedIn.name}, starting from here you can create new surveys and check submissions.
              </Col>
              <Col className="theviewer" align="left" md={{ span: 6, offset: 3 }}> 
                 
-            { mySurveys ? 
+            { mySurveys && mySurveys.length > 0 ? 
             <>
                 {mySurveys.map((s, i) =>
                 <div key={s.id}>  
@@ -69,5 +72,6 @@ export default function SurveyDashboard(props){
             </div>
             </Col>
         </Container>
+        </>}
     </>)
 }

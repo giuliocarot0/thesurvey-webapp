@@ -5,6 +5,7 @@ import {Link, Redirect} from 'react-router-dom'
 import {createOpenQuestion, createClosedQuestion} from './surveymock'
 import API from '../API'
 import QuestionViewer from './QuestionViewer'
+import LoadingComponent from './LoadingComponent'
 
 
 export default function SurveyEditor(props){
@@ -75,6 +76,8 @@ export default function SurveyEditor(props){
     return (
         <> 
             {!loggedIn && <Redirect to="/login"/>}
+            {loading ? <LoadingComponent></LoadingComponent>
+            :<>
             <Container>
                 {(error || successful) && 
                 <Col className="theviewer" align="center" md={{ span: 6, offset: 3 }}>
@@ -134,6 +137,7 @@ export default function SurveyEditor(props){
                 </Col>
                 
             </Container>
+            </>}
         </>
     )
 }
@@ -228,10 +232,10 @@ function QuestionEditor(props){
                 <Form.Group>
                     {answers.map((a,i) => { return(
                     i<activeAnswers &&
-                        <>
-                        <Form.Text>Answer {i+1}</Form.Text>
+                        <div key={"div-"+(i+1)}>
+                        <Form.Text key={"label-"+(i+1)}>Answer {i+1}</Form.Text>
                         <Form.Control value={answers[i]} type="text" key={i+1} id={i+1} onChange={(e)=>{editAnswer(e.target.id,e.target.value)}}></Form.Control>
-                        </>
+                        </div>
                     
                     )})}
                     <Button variant="link" onClick={()=>{setActiveAnswers(i=>i+1)}}>Add an answer</Button>

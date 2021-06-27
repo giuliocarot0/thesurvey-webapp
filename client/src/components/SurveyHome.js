@@ -2,6 +2,7 @@ import {Col, Container, Button, Row} from 'react-bootstrap'
 import {useState, useEffect} from 'react'
 import { Link, Redirect} from 'react-router-dom'
 import API from '../API'
+import LoadingComponent from './LoadingComponent';
 
 /*this components list all the available surveys*/
 export default function SurveyHome(props) {
@@ -11,26 +12,25 @@ export default function SurveyHome(props) {
     const [loading, setLoading] = useState(true);
 
     useEffect(()=>{
-        API.getSurveyList()
-            .then( list => {
-                if(list.length > 0)
-                    setSurveys(list)
-                setRefresh(false)
-                setLoading(false)
-            })
-            .catch((err) => {
-                //TODO: error handling here
-                setRefresh(false);
-                setLoading(false);
-            })
-       
-    },[refresh, loading])
+        const getList = async()=>{
+           let list = await  API.getSurveyList()
+           if(list) 
+                setSurveys(list)
+           else 
+               setSurveys(false)
+           setLoading(false);
+           setRefresh(false);
+        }
+        if(refresh){
+                getList()
+            }
+    },[refresh])
 
    
     return (<>
         {loggedIn && <Redirect to="/dashboard"/>}
 
-        {loading ? "Please wait while the content loads!" :<>
+        {loading ? <LoadingComponent></LoadingComponent>:<>
             <Container className="home">
              {surveys ? 
                  <Col className="theviewer" align="center" md={{ span: 6, offset: 3 }}> 
