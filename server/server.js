@@ -4,17 +4,17 @@ const passport = require('passport'); // auth middleware
 const userDao = require('./lib/user')
 const express = require('express');
 const survey = require('./lib/survey')
+const session = require('express-session'); // enable sessions
 
 /*** Set up Passport ***/
 // set up the "username and password" login strategy
 // by setting a function to verify username and password
 passport.use(new LocalStrategy(
   function(username, password, done) {
-    userDao.getUser(username, password).then((user) => {
-      if (!user)
+    userDao.get(username, password).then((response) => {
+      if (!response)
         return done(null, false, { message: 'Incorrect username and/or password.' });
-        
-      return done(null, user);
+      return done(null, response.user);
     })
   }
 ));
@@ -37,16 +37,24 @@ passport.deserializeUser((id, done) => {
 
 
 // init express
+
 const app = new express();
 const port = 3001;
 
+
+// set up the session
+app.use(session({
+  // by default, Passport uses a MemoryStore to keep track of the sessions
+  secret: 'a secret sentence not to share with anybody and anywhere, used to sign the session ID cookie',
+  resave: false,
+  saveUninitialized: false 
+}));
+
+// then, init passport
+app.use(passport.initialize());
+app.use(passport.session());
+
 app.use(express.json())
-app.use((req, res, next) => {
-  req.user = 1;
-  next();
-})
-
-
 /* SURVEY API ENDPOINTS */
 const basepath = "/api/surveys/";
 
@@ -57,25 +65,22 @@ app.post(basepath, async (req, res) => {
   try{
       if(!req.user) return res.status(401).send({error: "Unauthenticated User"})
       else {
-        let response = await survey.new(req.body, req.user)
+        let response = await survey.new(req.body, req.user.id)
        return res.send({message: "survey successfully created"}) 
     }
   }
   catch(e){
-      console.log(e)
       return res.status(500).send({error: "Internal Server Error"})
   }
 })
 
 app.get(basepath+":id", async (req,res) => {
   try{
-    let result =  await survey.getFromDB(req.params.id)/*.catch(e=> { return res.status(500).send({error: "Internal Server Error"})})*/
+    let result =  await survey.getFromDB(req.params.id)
     if(!result)
       return res.status(404).send({error: "Requested survey not found!"})
-    else if (result && (result.public || result.owner === req.user))
+    else if (result)
       return res.status(200).send(result)
-    else 
-      return res.status(403).send({error: "Unauthorized user!"})
   }
   catch(e){
     console.log(e)
@@ -93,7 +98,7 @@ app.get(basepath+":id", async (req,res) => {
  */
 app.get(basepath, async(req, res) => {
   try {
-    let result = !req.user ? await survey.getList() : await survey.getMyList(req.user)
+    let result = !req.user ? await survey.getList() : await survey.getMyList(req.user.id)
     return res.send(result);
   }
   catch(e){
@@ -103,11 +108,14 @@ app.get(basepath, async(req, res) => {
 
 app.get(basepath + "read/" + ":id" + "/partecipants", async (req, res) => {
   try {
-    let partecipants = await survey.getPartecipants(req.user,req.params.id)
-    if(Object.keys(partecipants).length > 0)
-      return res.send(partecipants)
-    else
-      return res.status(404).send({error:"No partecipants found"});
+    if(!req.user) res.status(401).send({error: "Not authenticated!"})
+    else{
+      let partecipants = await survey.getPartecipants(req.user.id,req.params.id)
+      if(Object.keys(partecipants).length > 0)
+        return res.send(partecipants)
+      else
+        return res.status(404).send({error:"No partecipants found"});
+    }
   }catch(e){
     return res.status(500).send({error: "Internal Server Error", more: e})
   }
@@ -118,7 +126,7 @@ app.get(basepath + "read/" + ":id" + "/partecipants/" + ":pid", async (req, res)
   try{
     if(!req.user) res.status(401).send({error: "Not authenticated!"})
     else{
-      let submissions = await survey.getSubmissionForSurvey(req.user,req.params.id,req.params.pid)
+      let submissions = await survey.getSubmissionForSurvey(req.user.id,req.params.id,req.params.pid)
       if(submissions!==false)
         return res.send(submissions)
       else
