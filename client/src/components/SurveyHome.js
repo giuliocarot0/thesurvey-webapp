@@ -1,11 +1,11 @@
 import {Col, Container, Button, Row} from 'react-bootstrap'
 import {useState, useEffect} from 'react'
-import { Link} from 'react-router-dom'
+import { Link, Redirect} from 'react-router-dom'
 import API from '../API'
 
 /*this components list all the available surveys*/
 export default function SurveyHome(props) {
-
+    const {loggedIn} = props;
     const [surveys, setSurveys] = useState(false);
     const [refresh, setRefresh] = useState(true);
     const [loading, setLoading] = useState(true);
@@ -28,6 +28,8 @@ export default function SurveyHome(props) {
 
    
     return (<>
+        {loggedIn && <Redirect to="/dashboard"/>}
+
         {loading ? "Please wait while the content loads!" :<>
             <Container className="home">
              {surveys ? 

@@ -1,8 +1,8 @@
 import SurveyViewer from './SurveyViewer'
 import {useState, useEffect} from 'react'
-import {useLocation} from 'react-router-dom'
+import {useLocation, Redirect} from 'react-router-dom'
 import {fillableSurvey} from './surveymock'
-import {Alert, Col} from 'react-bootstrap'
+import {Col} from 'react-bootstrap'
 import API from '../API'
 import './components.css'
 export default function SurveyCompiler(props){
@@ -13,7 +13,7 @@ export default function SurveyCompiler(props){
     const [validationError, setValidationError] = useState(false);
     const [loading, setLoading] = useState(false);
     const location = useLocation();
-    
+    const {loggedIn} = props;
     const path = location.pathname.substring(10)
     const sid = parseInt(path)
 
@@ -67,7 +67,7 @@ export default function SurveyCompiler(props){
                 let ans_count = ans.length
                 if (ans_count < q.min || ans_count > q.max) errors.push(q.qid)
                 else {
-                    ans.map( a => {
+                    ans.forEach( a => {
                         vanswers.push({
                         question_id: q.qid, 
                         answer_id: a.aid
@@ -98,6 +98,7 @@ export default function SurveyCompiler(props){
     }
 
     return (<>
+        {loggedIn && <Redirect to="/dashboard"/>}
             {loading && "LOADING..." } 
             {(validationError || error) && !loading &&
                 <Col className="theviewer" align="center">

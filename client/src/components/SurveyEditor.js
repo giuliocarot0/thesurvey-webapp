@@ -1,21 +1,23 @@
 import './components.css'
 import {Col, Container, Form, Button, Row, Alert} from 'react-bootstrap'
 import {useState} from 'react'
-import {Link} from 'react-router-dom'
+import {Link, Redirect} from 'react-router-dom'
 import {createOpenQuestion, createClosedQuestion} from './surveymock'
-
+import API from '../API'
 import QuestionViewer from './QuestionViewer'
 
 
 export default function SurveyEditor(props){
-
+    const {loggedIn} = props
     const [questions, setQuestions] = useState([])
     const [title, setTitle] = useState("")
     const [step, setStep] = useState(0)
-    const [questionCounter, setQuestionCounter] = useState(0)
+    const [questionCounter, setQuestionCounter] = useState(1)
     const [addForm, setAddForm] = useState(false);
-    
-    
+    const [successful, setSuccessful] = useState(false)
+    const [error, setError] = useState(false)
+    const [loading, setLoading] = useState(false)
+
     const createNewQuestion = (text, type, answers, min, max, mandatory)=>{
         if(type==="Open") 
             setQuestions([...questions, createOpenQuestion(questionCounter, text, mandatory)])
@@ -33,11 +35,10 @@ export default function SurveyEditor(props){
         for(let i in questions) {
             if(questions[i].qid === parseInt(qid) && i > 0){
                 i = parseInt(i) 
-                let q_temp = questions[i];
-                questions[i] = questions[i-1]
-                questions[i-1] = q_temp
-                questions[i].order= i;
-                questions[i-1].order= i-1;
+                let qid_t = 0
+                qid_t = questions[i-1].qid;
+                questions[i-1].qid = questions[i].qid;
+                questions[i].qid = qid_t;
                 setQuestions(questions.filter((a)=> {return true}))
             }
         }
@@ -47,18 +48,39 @@ export default function SurveyEditor(props){
         for(let i in questions) {
             if(questions[i].qid === parseInt(qid) && i < questions.length - 1){
                 i = parseInt(i) 
-                let q_temp = questions[i];
-                questions[i] = questions[i+1]
-                questions[i+1] = q_temp
-                questions[i+1].order = i+1;
-                questions[i].order = i;
+                let qid_t = 0
+                qid_t = questions[i+1].qid;
+                questions[i+1].qid = questions[i].qid;
+                questions[i].qid = qid_t;
                 setQuestions(questions.filter((a)=> {return true}))
             }
         }
     }
+
+    const createSurvey = ()=>{
+        setLoading(true);
+        let survey = {title: title, questions: questions}
+        API.createSurvey(survey).then((r) => {
+            setSuccessful(true)
+            setStep(0)
+            setLoading(false)
+        })
+        .catch(e =>{
+            setError(e)
+            setStep(0)
+            setLoading(false)
+        })
+    }
+
     return (
         <> 
+            {!loggedIn && <Redirect to="/login"/>}
             <Container>
+                {(error || successful) && 
+                <Col className="theviewer" align="center" md={{ span: 6, offset: 3 }}>
+                    {error && <h4 color="red">{"Cannot create the survey due to" + error.error}</h4>}
+                    {successful && <h4 color="red"> Your survey has been successfully created!</h4>}
+                </Col>}
                 <Col className="theviewer" align="center" md={{ span: 6, offset: 3 }}>
                     <h4>Survey Studio</h4>
                     <font>Create a new survey fullfilling the following fields and following the instructions</font>
@@ -74,12 +96,12 @@ export default function SurveyEditor(props){
                         : 
                         <div>
                             <div align="center"><h2>{title}</h2></div>
-                            {questions.map(q => { return (
+                            {questions.sort((a,b)=>{return a.qid-b.qid}).map(q => { return (
                             <div key={q.qid}>
                                 <div align="right">
                                     <Button variant="outline-secondary" id={q.qid} onClick={(e)=>deleteQuestion(e.target.id)}> Delete</Button>
-                                    <Button variant="outline-secondary" disabled={questions.length === 1 || q.order===0} id={q.qid} onClick={(e)=>swapUpQuestion(e.target.id)}>Up</Button>
-                                    <Button variant="outline-secondary" disabled={questions.length === 1 || q.order===questions.length -1} id={q.qid} onClick={(e)=>swapDownQuestion(e.target.id)}> Down</Button>
+                                    <Button variant="outline-secondary" disabled={questions.length === 1 || q.qid === 1 } id={q.qid} onClick={(e)=>swapUpQuestion(e.target.id)}>Up</Button>
+                                    <Button variant="outline-secondary" disabled={questions.length === 1 || q.qid === questions.length } id={q.qid} onClick={(e)=>swapDownQuestion(e.target.id)}> Down</Button>
                                </div>
                                <QuestionViewer questionPreview  question={q}></QuestionViewer>
                             </div>)
@@ -105,7 +127,7 @@ export default function SurveyEditor(props){
                         {step===0?
                             <Button style={{margin:"20px"}} onClick={()=>{setStep(1)}} disabled={title===""}>Next</Button>
                             :
-                            <Button style={{margin:"20px"}} onClick={()=>{setStep(1)}} disabled={questions.length < 1}>Create</Button>
+                            <Button style={{margin:"20px"}} onClick={()=>{createSurvey()}} disabled={questions.length < 1}>Create</Button>
                         }
                     </Col>
                     </Row>  
@@ -145,7 +167,7 @@ function QuestionEditor(props){
         if(text==="") setError("Question number must have a text")
         else
             if(type==="Multiple"){
-                let validAnswers = answers.filter((a) => {return a!==""}).map((a,i) => {return {aid: i, text: a, selected: false}})
+                let validAnswers = answers.filter((a) => {return a!==""}).map((a,i) => {return {aid: i+1, text: a, selected: false}})
                 if(validAnswers.length < min || validAnswers.length < max)
                     setError("Answers number must be greater or equal to minimum answer option")
                 else{
@@ -195,7 +217,7 @@ function QuestionEditor(props){
                                 <option>10</option>
                             </Form.Control>
                             <h5>Max Answers</h5>
-                            <Form.Control value={max} as="select"  onChange={(e)=>{setMax(e.target.value)}} >
+                            <Form.Control value={max} as="select"  onChange={(e)=>{setMax(parseInt(e.target.value))}} >
                                 {createMaxOptions().map((i)=> {return <option key={i}>{i}</option>})}
                             </Form.Control>
                         </>

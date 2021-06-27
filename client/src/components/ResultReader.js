@@ -1,11 +1,13 @@
 import SurveyViewer from './SurveyViewer'
 import {Col, Container, Button, ButtonGroup} from 'react-bootstrap'
 import {useState, useEffect} from 'react'
-import {useLocation} from 'react-router-dom'
+import {useLocation, Redirect} from 'react-router-dom'
 import {fillableSurvey, filledSurvey} from './surveymock'
 import API from '../API'
 
 export default function ResultReader(props){
+    const {loggedIn} = props;
+
     const [survey, setSurvey] = useState(false)
     const [surveys, setSurveys] = useState(false);
     const [index, setIndex] = useState("");
@@ -15,6 +17,7 @@ export default function ResultReader(props){
     const [error, setError] = useState(false)
     const [partecipants, setPartecipants] = useState(false)
     const [loading, setLoading] = useState(false)
+
     const location = useLocation();
     
     const path = location.pathname.substring(8)
@@ -72,7 +75,7 @@ export default function ResultReader(props){
                     setError({error: "Cannot create render suitable survey"})
                 }
             }).catch(e=>{
-                setError({error: e})
+                setError({error: e.error})
                 setSurveys(false)
                 setRefresh(false)
             })
@@ -92,10 +95,10 @@ export default function ResultReader(props){
     }
     return (
         <>              
-        
+        {!loggedIn && <Redirect to="/login"/>}
         <Container>
             <Col className="theviewer" md={{ span: 6, offset: 3 }}> 
-            {error} <h3>{error}</h3>
+             {error && <h3>{error.error}</h3> }
             {!loading? <> {
                 surveys && <>
                     <Col md={4}>  

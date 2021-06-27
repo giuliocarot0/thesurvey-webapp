@@ -1,11 +1,12 @@
 
 import {useState, useEffect} from 'react'
 import {Col, Container, Button, Row} from 'react-bootstrap'
-import {Link} from 'react-router-dom'
+import {Link, Redirect} from 'react-router-dom'
 import API from '../API'
 
 export default function SurveyDashboard(props){
     const user = "Giulio"
+    const {loggedIn} = props;
     const [mySurveys, setMySurveys] = useState(false)
     const [refresh, setRefresh] = useState(true)
     const [loading, setLoading] = useState(true)
@@ -26,10 +27,11 @@ export default function SurveyDashboard(props){
        
     },[refresh, loading])
 
-    return (
+    return (<>
+        {!loggedIn && <Redirect to="/login"/>}
         <Container>
              <Col className="theviewer" align="center" md={{ span: 6, offset: 3 }}> 
-                 <h4>{user}'s Dashboard</h4>
+                 <h4>{loggedIn.username}'s Dashboard</h4>
                  {user}, starting from here you can create new surveys and check submissions.
              </Col>
              <Col className="theviewer" align="left" md={{ span: 6, offset: 3 }}> 
@@ -47,7 +49,7 @@ export default function SurveyDashboard(props){
                             Total submissions: {s.submission}
                             &nbsp;
                             &nbsp;
-                            <Link to={"/reader/"+s.id}><Button style={{backgroundColor:"#8860d0"}}>Check</Button></Link>
+                            <Link to={"/reader/"+s.id}><Button disabled={s.submission === 0} style={{backgroundColor:"#8860d0"}}>Check</Button></Link>
                         </div>
                         </Col>
                     </Row>
@@ -67,5 +69,5 @@ export default function SurveyDashboard(props){
             </div>
             </Col>
         </Container>
-    )
+    </>)
 }
