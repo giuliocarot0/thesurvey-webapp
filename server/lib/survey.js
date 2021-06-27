@@ -9,10 +9,73 @@ exports.create = (b)=>{
         id: b.survey_id,
         title: b.title,
         owner: b.owner,
-        public: b.public,
         questions: []
     }
 }
+
+exports.new = async (survey, uid)=>{
+    try {
+        console.log(survey)
+        let survey_id = await addIntoSurvey(survey, uid);
+        if (!survey_id) throw new Exception()
+        console.log(survey)
+        for(let q in survey.questions){
+            await addQuestion(survey.questions[q], survey_id)
+            for(let a in survey.questions[q].answers){
+                await addAnswer(survey.questions[q].answers[a], survey.questions[q].qid, survey_id)
+            }
+        }
+        return new Promise((resolve, reject)=>{
+                    resolve(survey_id)
+        })
+    }
+    catch(e){
+        return new Promise((resolve, reject)=>{
+            reject({error: e})
+        })
+    }
+}
+
+const addIntoSurvey = (survey, uid) => {
+    return new Promise((resolve, reject) => {
+        let query = "INSERT INTO SURVEY (title, owner) VALUES(?,?)"
+        db.run(query, [survey.title, uid], async function(err, res){
+            if(err) reject({error:"Internal Server Error", from: "add_survey", more: err})
+            else if (this.changes > 0) resolve(this.lastID);
+            else reject({error: "Invalid Data Entry"})
+        })
+    })
+}
+const addQuestion = (question, survey_id) => {
+    return new Promise((resolve, reject) => {
+        if(question.multiple){
+            let query = "INSERT INTO QUESTION (question_id, survey_id, text, min, max) VALUES(?,?,?,?,?)"
+            db.run(query, [question.qid, survey_id, question.text, question.min, question.max], async function(err, res){
+                if(err) reject({error:"Internal Server Error", from: "add_question", more: err})
+                else if (this.changes > 0) resolve(this.lastID);
+                else reject({error: "Invalid Data Entry"})
+            })
+        }
+        else {
+            let query = "INSERT INTO QUESTION (question_id, survey_id, text, mandatory) VALUES(?,?,?,?)"
+            db.run(query, [question.qid, survey_id, question.text, question.mandatory], async function(err, res){
+                if(err) reject({error:"Internal Server Error" ,from: "add_question", more: err})
+                else if (this.changes > 0) resolve(this.lastID);
+                else refect({error: "Invalid Data Entry"})
+            })
+        }
+    })
+}
+const addAnswer = (answer, question_id, survey_id)=>{
+    return new Promise((resolve, reject) => {
+        let query = "INSERT INTO ANSWER (answer_id, question_id, text, survey_id) VALUES(?,?,?,?)"
+        db.run(query, [answer.aid, question_id, answer.text, survey_id], async function(err, res){
+            if(err) reject({error:"Internal Server Error", more: err})
+            else if (this.changes > 0) resolve(this.lastID);
+            else refect({error: "Invalid Data Entry"})
+        })
+    })
+} 
 
 exports.getList = ()=>{
     return new Promise((resolve, reject)=>{
@@ -40,21 +103,35 @@ exports.getPartecipants = ((uid, sid) => {
         })
     })
 })
+
+const hasPartecipated = ((uid, sid, pid) => {
+    return new Promise ((resolve, reject) => {
+        let query = "SELECT partecipant_id \
+                    FROM PARTECIPANT P, SURVEY S  \
+                    WHERE S.survey_id = P.survey_id AND S.owner = ? AND S.survey_id = ? AND P.partecipant_id = ?"
+        db.get(query, [uid, sid, pid], (err, res) => {
+            if(err) reject(err)
+            else resolve(res)
+        })
+    })
+})
 exports.getMyList = (uid)=>{
     return new Promise((resolve, reject) => {
         if(!uid) reject({error: "invalid userId"})
         else{
             let query =
-            "SELECT S.title, S.survey_id, COUNT(DISTINCT partecipant_id) AS submission \
-            FROM PARTECIPANT P, SURVEY S \
-            WHERE P.survey_id = S.survey_id AND S.owner = ? \
-            GROUP BY S.survey_id;"
+            "SELECT S.title, S.survey_id, COUNT(Distinct P.partecipant_id) as submissions\
+            FROM  SURVEY S \
+            LEFT JOIN PARTECIPANT P\
+            ON S.survey_id = P.survey_id\
+            WHERE owner = ? \
+            GROUP BY S.survey_id"
             let list = db.all(query, [uid], (err, rows)=>{
                 if(err) reject(err);
                 else{
                     let sList = []
                     rows.map((s) => {
-                        sList.push({id: s.survey_id, title: s.title, submission: s.submission})
+                        sList.push({id: s.survey_id, title: s.title, submission: s.submissions})
                     })
                     resolve(sList)
                 }
@@ -101,17 +178,17 @@ const getQuestionsFromDB = async (sid) => {
     let quest =  await questions;
     for(q in quest) {
         if(quest[q].multiple){
-            quest[q].answers = await getAnswersFromDB(quest[q].id);
+            quest[q].answers = await getAnswersFromDB(quest[q].id, sid);
         }
     }
     return quest;
 
 }
 
-const getAnswersFromDB = async (qid) => {
+const getAnswersFromDB = async (qid, sid) => {
     return new Promise((resolve, reject) => {
-        let ans_query = "SELECT answer_id, text FROM ANSWER WHERE question_id = ?"
-        db.all(ans_query, [qid], (err, result) => {
+        let ans_query = "SELECT answer_id, text FROM ANSWER WHERE question_id = ? AND survey_id = ?"
+        db.all(ans_query, [qid, sid], (err, result) => {
             if(err)
                 reject(err)
             resolve(result);
@@ -143,7 +220,7 @@ const addEntry = (sid, uid, entry) =>{
             db.run(ins, [sid, entry.question_id, entry.text ,uid],async function(err, res){
                 if(err) reject({error: err})
                 else if( this.changes > 0 ) resolve(res)
-                else reject({error: "cannot add the following entry"})
+                else reject(null)
             })
         } 
         else if (entry.answer_id){
@@ -151,7 +228,7 @@ const addEntry = (sid, uid, entry) =>{
             db.run(ins, [ entry.question_id, entry.answer_id ,uid,sid],async function(err, res){
                 if(err) reject({error: err})
                 else if( this.changes > 0 ) resolve(res)
-                else reject({error: "cannot add the following entry"})
+                else reject({error: "Invalid parameters"})
             })
         }
         else {
@@ -171,7 +248,7 @@ const addPartecipant = (sid,name) => {
                     db.run(ins, [res.lastID + 1, name, sid], async function (err, result){
                         if(err) reject({error: err})
                         else if (this.changes > 0) resolve(res.lastID + 1)
-                        else reject({error: "Cannot update PARTECIPANT"})
+                        else reject({error: "Invalid parameters"})
                     })
                 }
             })
@@ -181,13 +258,13 @@ const addPartecipant = (sid,name) => {
 
 
 exports.getSubmissionForSurvey  = async (uid,sid,pid) =>{
-    
-        let open_entries = await getOpenEntries(uid,sid,pid)
-        let closed_entries = await getClosedEntries(uid, sid, pid)
-
+        let partecipated = await hasPartecipated(uid, sid, pid)
+        let open_entries = await getOpenEntries(sid,uid,pid)
+        let closed_entries = await getClosedEntries(sid, uid, pid)
        // now creates arrays of arrays to ensure direct access to questions and eventually answers
        return new Promise((resolve, reject) => {
-           if(open_entries && closed_entries) resolve(open_entries.concat(closed_entries))
+           if(!partecipated) resolve(false)
+           else if (open_entries && closed_entries) resolve(open_entries.concat(closed_entries))
            else reject({error: "Error retreiving entries form DB"})
        })
 }
@@ -195,11 +272,14 @@ exports.getSubmissionForSurvey  = async (uid,sid,pid) =>{
 const getOpenEntries = async (sid, uid, partecipant) => {
     return new Promise((resolve, reject) =>{
         let open_entries = "SELECT E.question_id, E.text  \
-                              FROM PARTECIPANT P, OPEN_ENTRY E, SURVEY S\
-                              WHERE P.partecipant_id = E.partecipant AND S.survey_id = E.survey_id AND E.survey_id = ? AND S.owner = ? AND E.partecipant = ?"
+                              FROM OPEN_ENTRY E, SURVEY S \
+                              WHERE S.survey_id = E.survey_id AND E.survey_id = ? AND S.owner = ? AND E.partecipant = ?"
+        console.log(sid)
         db.all(open_entries, [sid, uid, partecipant], (err, result) => {
             if(err) reject(err)
-            else resolve(result)
+            else {
+                resolve(result)
+            }
             })
          })
     }
@@ -207,8 +287,8 @@ const getOpenEntries = async (sid, uid, partecipant) => {
 const getClosedEntries = async (sid, uid, partecipant) => {
     return new Promise((resolve, reject) =>{
         let open_entries = "SELECT E.question_id, E.answer_id\
-                              FROM PARTECIPANT P, CLOSED_ENTRY E, SURVEY S\
-                              WHERE P.partecipant_id = E.partecipant AND S.survey_id = E.survey_id AND E.survey_id = ? AND S.owner = ? AND E.partecipant = ?"
+                              FROM CLOSED_ENTRY E, SURVEY S\
+                              WHERE S.survey_id = E.survey_id AND E.survey_id = ? AND S.owner = ? AND E.partecipant = ?"
         db.all(open_entries, [sid, uid, partecipant], (err, result) => {
             if(err) reject(err)
             else resolve(result)
