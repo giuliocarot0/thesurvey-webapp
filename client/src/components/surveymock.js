@@ -10,26 +10,12 @@
             return questions.push({qid: q.id, multiple: true, text: q.text, min: q.min, max:q.max, answers: answers})
         }
         else    
-            return questions.push({qid: q.id, text: q.text, madatory: q.mandatory, answer:""});
+            return questions.push({qid: q.id, text: q.text, mandatory: q.mandatory, answer:""});
     })
     questions.sort((a,b) => a.qid - b.qid)
     return {sid: s.id, title: s.title, questions:questions, user:""};
 }
 
-    const filledSurvey = (survey, a, p) => {
-        let s = JSON.parse(JSON.stringify(survey))
-        //assuming s a fillableSurvey
-        for(let e in a){
-            if(a[e].text){
-                s.questions[a[e].question_id - 1].answer = a[e].text;
-            }
-            else{ 
-                s.questions[a[e].question_id - 1 ].answers[a[e].answer_id  - 1].selected = true;           
-            }
-        }
-        s.user = p;
-        return s;
-    }
 
 
 const createOpenQuestion = (qid, text, mandatory) =>{

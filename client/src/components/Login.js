@@ -1,4 +1,4 @@
-import {Form, Container, Button, Col, Spinner} from 'react-bootstrap'
+import {Form, Container, Button, Col} from 'react-bootstrap'
 import {Redirect} from 'react-router-dom'
 import {useState} from 'react'
 import API from '../API'
@@ -53,11 +53,13 @@ export default function Login(props){
                     </Form.Group>
                     <div align="right"> 
                     {error && <font color="red" style={{margin: "30px"}}> Cannot login, please check username and password!</font>}
+                   
                     <Button variant="primary" disabled={loading} onClick={handleSubmit}>
                         {loading ? 
                             "Loading..."
                             : "Login" }
                     </Button>
+                   
                     </div>
                 </Form>
             </Col>    

@@ -1,5 +1,5 @@
 import {Navbar,Col, Button} from 'react-bootstrap';
-import {useLocation, Link} from 'react-router-dom'
+import {Link, useLocation} from 'react-router-dom'
 import './components.css'
 
 
@@ -22,7 +22,12 @@ function SurveyNavbar(props){
           : 
           <Button style={{margin:"5px"}} onClick={()=>{onLogout()}}> {"Logout"}</Button>
         } 
-        </>}      
+        </>}     
+        {location.pathname === "/login" ? 
+          <Link to="/">
+            <Button style={{margin:"5px"}}> {"Home"}</Button>
+          </Link> : ""
+        } 
         </Col> 
   </Navbar>
 )

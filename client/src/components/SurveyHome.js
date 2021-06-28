@@ -5,26 +5,29 @@ import API from '../API'
 import LoadingComponent from './LoadingComponent';
 
 /*this components list all the available surveys*/
-export default function SurveyHome(props) {
-    const {loggedIn} = props;
+export default function SurveyHome(props){
+    const {loggedIn} = props; 
     const [surveys, setSurveys] = useState(false);
-    const [refresh, setRefresh] = useState(true);
     const [loading, setLoading] = useState(true);
 
     useEffect(()=>{
-        const getList = async()=>{
-           let list = await  API.getSurveyList()
-           if(list) 
-                setSurveys(list)
-           else 
-               setSurveys(false)
-           setLoading(false);
-           setRefresh(false);
-        }
-        if(refresh){
-                getList()
-            }
-    },[refresh])
+        let mounted = true
+        API.getSurveyList()
+            .then((l) => {
+                if(mounted){
+                    setSurveys(l)
+                    setLoading(false)
+                }
+            })
+            .catch((e) => {
+                if(mounted){
+                    setSurveys(false)
+                    setLoading(false)
+                    }
+                })
+        
+        return ()=>{mounted=false};
+    },[loading])
 
    
     return (<>

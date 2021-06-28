@@ -8,25 +8,28 @@ import LoadingComponent from './LoadingComponent'
 export default function SurveyDashboard(props){
     const {loggedIn} = props;
     const [mySurveys, setMySurveys] = useState(false)
-    const [refresh, setRefresh] = useState(true)
     const [loading, setLoading] = useState(true)
 
   
     
 
     useEffect(()=>{
+        let mounted = true
         API.getSurveyList()
-            .then((list) => {               
-                setMySurveys(list)
-                setRefresh(false)
-                setLoading(false)
+            .then((list) => {     
+                if(mounted){          
+                    setMySurveys(list)
+                    setLoading(false)
+                }
             })
             .catch((err) => {
-                //TODO: error handling here
-                setRefresh(false);
-                setLoading(false);
+                if(mounted){
+                    //TODO: error handling here
+                    setLoading(false);
+                }
             })
-    },[refresh])
+        return ()=>{mounted=false}
+    },[loading])
 
     return (<>
         {!loggedIn && <Redirect to="/login"/>}

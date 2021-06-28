@@ -1,4 +1,4 @@
-import {BrowserRouter as Router, Route} from 'react-router-dom';
+import {BrowserRouter as Router, Route, Redirect, Switch} from 'react-router-dom';
 import {useState, useEffect} from 'react';
 
 import SurveyNavbar from './components/navbar';
@@ -17,8 +17,8 @@ require('bootstrap')
 function App() {
 
   const [loggedIn, setLoggedIn] = useState(false)
-  const [loading, setLoading] = useState(false)
-  const [refresh, setRefresh] = useState(true)
+  const [loading, setLoading] = useState(true)
+  
   const logoutHandler = ()=>{
     API.logout().then()
     setLoggedIn(false);
@@ -32,13 +32,11 @@ function App() {
     API.getUserInfo().then((u)=>{
       setLoggedIn(u)
       setLoading(false)
-      setRefresh(false)
     }).catch(e =>{      
       setLoading(false)
       setLoggedIn(false)
-      setRefresh(false)
     })
-  }, [refresh])
+  }, [])
 
   return ( 
       
@@ -52,13 +50,15 @@ function App() {
           </> 
           :
           <>
-          <Route  exact path="/login"><Login loggedIn={loggedIn} onLogin={loginHandler}></Login></Route>
-          <Route  exact path="/"><SurveyHome loggedIn={loggedIn}></SurveyHome></Route>          
-          <Route  path="/compiler"> <SurveyCompiler loggedIn={loggedIn}></SurveyCompiler></Route>
-
-          <Route  exact path="/dashboard"><SurveyDashboard refresh={refresh} loaded={setRefresh} loggedIn={loggedIn}></SurveyDashboard></Route>
-          <Route  exact path="/create"><SurveyEditor loggedIn={loggedIn}></SurveyEditor> </Route>
-          <Route  path="/reader"> <ResultReader loggedIn={loggedIn}></ResultReader></Route>
+          <Switch>
+            <Route  exact path="/login"><Login loggedIn={loggedIn} onLogin={loginHandler}></Login></Route>
+            <Route  exact path="/"><SurveyHome loggedIn={loggedIn}></SurveyHome></Route>          
+            <Route  path="/compiler"> <SurveyCompiler loggedIn={loggedIn}></SurveyCompiler></Route>
+            
+            <Route  exact path="/dashboard"><SurveyDashboard loggedIn={loggedIn}></SurveyDashboard></Route>
+            <Route  exact path="/create"><SurveyEditor loggedIn={loggedIn}></SurveyEditor> </Route>
+            <Route  path="/reader"> <ResultReader loggedIn={loggedIn}></ResultReader> </Route>
+          </Switch>
           </>
         }
         </Container>

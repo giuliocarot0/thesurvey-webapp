@@ -22,7 +22,7 @@ export default function QuestionViewer(props) {
     return(
         <>
                 <Form.Group >
-                        <h4>{question.text} {(question.mandatory || question.min>0)? <font color="red">*</font> : ""} </h4>                        
+                        <h4>{question.text} {(question.mandatory || question.min>0) ? <font color="red">*</font> : ""} </h4>                        
                         {error ? <font color="red">Max {question.max} answers allowed!</font>:""}
                 
                         <div className="theanswers">

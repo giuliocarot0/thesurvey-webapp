@@ -27,6 +27,7 @@ export default function SurveyCompiler(props){
             .then(s => {
                 setSurvey(fillableSurvey(s)) 
                 setRefresh(false)
+
             })  
             .catch(err => {
                 setError(err.error)
@@ -76,7 +77,8 @@ export default function SurveyCompiler(props){
                 }
             }
             else{
-                if(q.text.length === 0 && q.mandatory) errors.push(q.qid)
+                console.log(q.answer)
+                if(q.answer.length === 0 && q.mandatory) errors.push(q.qid)
                 else vanswers.push({question_id: q.qid, text: q.answer})
             }
         })
@@ -89,6 +91,7 @@ export default function SurveyCompiler(props){
             API.submitEntries(filledForm).then(res => {
                 setLoading(false)
                 setSubmitted(true)
+                setError(false)
             })
             .catch(err => {
                 setLoading(false)
@@ -100,7 +103,7 @@ export default function SurveyCompiler(props){
     return (<>
         {loggedIn && <Redirect to="/dashboard"/>}
             {loading && "LOADING..." } 
-            {(validationError || error) && !loading &&
+            {(validationError || error) && !loading && !submitted &&
                 <Col className="theviewer" align="center">
                     <font color="red" >{!error ? "Validation Error, please check your entries before submit" : error}</font>
                 </Col>
