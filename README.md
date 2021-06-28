@@ -175,6 +175,18 @@
 ]
 ```
 
+#### POST `/api/sessions`
+  - Login and create a session
+  - Request body are user credentials
+  - Request response is a json containing user info
+
+#### GET  `/api/sessions/current`
+  - Get current authenticated user deserialized. 
+  - Response a json conatining user info
+
+#### DELETE `/api/sesisons/curren`
+  - Destroy the current session and execute log out
+
 
 ## Database Tables
 
