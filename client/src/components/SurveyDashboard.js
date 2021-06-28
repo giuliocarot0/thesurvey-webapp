@@ -9,7 +9,7 @@ export default function SurveyDashboard(props){
     const {loggedIn} = props;
     const [mySurveys, setMySurveys] = useState(false)
     const [loading, setLoading] = useState(true)
-
+    const [error, setError] = useState(false)
   
     
 
@@ -24,7 +24,7 @@ export default function SurveyDashboard(props){
             })
             .catch((err) => {
                 if(mounted){
-                    //TODO: error handling here
+                    setError(false)
                     setLoading(false);
                 }
             })
@@ -41,7 +41,7 @@ export default function SurveyDashboard(props){
                  {loggedIn.name}, starting from here you can create new surveys and check submissions.
              </Col>
              <Col className="theviewer" align="left" md={{ span: 6, offset: 3 }}> 
-                
+             {error && <h3>{error.error}</h3> }
             { mySurveys && mySurveys.length > 0 ? 
             <>
                 {mySurveys.map((s, i) =>
@@ -63,7 +63,7 @@ export default function SurveyDashboard(props){
                 </div>)} 
             </>
             :
-                <h4> It looks like you have no surveys to check. Create a new one!</h4>    
+              !error &&  <h4> It looks like you have no surveys to check. Create a new one!</h4>    
             }
             <hr/>
             <div align="right">

@@ -2,6 +2,7 @@ import {Form, Container, Button, Col} from 'react-bootstrap'
 import {Redirect} from 'react-router-dom'
 import {useState} from 'react'
 import API from '../API'
+import validator from 'validator'
 
 export default function Login(props){
     const {onLogin, loggedIn} = props
@@ -12,24 +13,34 @@ export default function Login(props){
 
     const handleSubmit = (e)=>{
         e.preventDefault();
-        setLoading(true);
+        setLoading(true);            
+        let mounted = true;
+
         if(validateFields(username, password)){
             let credentials = {username, password}
             API.login(credentials)
                 .then((a) =>{
-                    setLoading(false)
-                    onLogin(a)
-                    setError(false)
+                    if(mounted){
+                        setLoading(false)
+                        onLogin(a)
+                        setError(false)
+                    }
                 })
                 .catch(e =>{
-                    setLoading(false)
-                    setError(true)
+                    if(mounted){
+                        setLoading(false)
+                        setError({type: "login"})
+                    }
                 })
         }
+        else   {
+            setLoading(false)
+            setError({type: "validation"})
+        } 
+        return () => mounted = false
     }
     const validateFields = (e,p)=>{
-        /*ADD VALIDATION HERE*/
-        return true;
+        return validator.isEmail(e) && p.length >= 8
     }
 
     return(<>
@@ -52,7 +63,7 @@ export default function Login(props){
                         <Form.Control value = {password} onChange={(e)=>{setPassword(e.target.value)}} type="password" placeholder="Password" />
                     </Form.Group>
                     <div align="right"> 
-                    {error && <font color="red" style={{margin: "30px"}}> Cannot login, please check username and password!</font>}
+                    {error && <font color="red" style={{margin: "30px"}}> {error.type === "login" ? " Cannot login, please check username and password!" : "Invalid email or password"}</font>}
                    
                     <Button variant="primary" disabled={loading} onClick={handleSubmit}>
                         {loading ? 

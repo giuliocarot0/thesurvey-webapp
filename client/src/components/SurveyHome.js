@@ -9,7 +9,8 @@ export default function SurveyHome(props){
     const {loggedIn} = props; 
     const [surveys, setSurveys] = useState(false);
     const [loading, setLoading] = useState(true);
-
+    const [error, setError] = useState(false)
+    
     useEffect(()=>{
         let mounted = true
         API.getSurveyList()
@@ -17,10 +18,12 @@ export default function SurveyHome(props){
                 if(mounted){
                     setSurveys(l)
                     setLoading(false)
+                    setError(false)
                 }
             })
             .catch((e) => {
                 if(mounted){
+                    setError(e)
                     setSurveys(false)
                     setLoading(false)
                     }
@@ -41,6 +44,8 @@ export default function SurveyHome(props){
                  Select one of the following surveys to start! The compiler will guide you step by step.
                 </Col>: "" }
                 <Col className="theviewer list" md={{ span: 9, offset: 0 }}>
+                    {error && <h3>{error.error}</h3> }
+
                     {surveys ? <>
                         {surveys.map((s, i) =>
                         <div key={s.id}>  
@@ -56,7 +61,7 @@ export default function SurveyHome(props){
                             </Row>
                             {i+1>=surveys.length ? <span></span> : <hr></hr>}
                         </div>)} </>
-                    :   <div align="center">
+                    :   !error && <div align="center">
                             <h3> I'm sorry but there is nothing to show here!</h3>
                             <p> Login and create a new survey!</p>
                         </div>

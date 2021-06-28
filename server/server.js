@@ -6,9 +6,7 @@ const express = require('express');
 const survey = require('./lib/survey')
 const session = require('express-session'); // enable sessions
 
-/*** Set up Passport ***/
-// set up the "username and password" login strategy
-// by setting a function to verify username and password
+/*===PASSPORT.js MIDDLEWARESS=====*/
 passport.use(new LocalStrategy(
   function(username, password, done) {
     userDao.get(username, password).then((response) => {
@@ -59,7 +57,10 @@ app.use(express.json())
 const basepath = "/api/surveys/";
 
 /**
- * This endpoint creates a new survey starting from it's title and his owner
+ * This endpoint creates a new survey
+ * User must be authenticated
+ * @body a json containing survey informations and questions
+ * @returns the operation response
  */
 app.post(basepath, async (req, res) => {
   try{
@@ -73,7 +74,11 @@ app.post(basepath, async (req, res) => {
       return res.status(500).send({error: "Internal Server Error"})
   }
 })
-
+/**
+ * This endpoint return a survey, given its ID
+ * @param id survey id
+ * @returns a survey
+ */
 app.get(basepath+":id", async (req,res) => {
   try{
     let result =  await survey.getFromDB(req.params.id)
@@ -106,6 +111,13 @@ app.get(basepath, async(req, res) => {
   }
 })
 
+/**
+ * This endpoint return a list of partecipants in a survey.
+ * User must be authenticated
+ * 
+ * @param id survey id
+ * @returns partecipant list
+ */
 app.get(basepath + "read/" + ":id" + "/partecipants", async (req, res) => {
   try {
     if(!req.user) res.status(401).send({error: "Not authenticated!"})
@@ -114,14 +126,19 @@ app.get(basepath + "read/" + ":id" + "/partecipants", async (req, res) => {
       if(Object.keys(partecipants).length > 0)
         return res.send(partecipants)
       else
-        return res.status(404).send({error:"No partecipants found"});
+        return res.status(404).send({error:"Requested Survey doesn't exist or there are no submissions yet"});
     }
   }catch(e){
     return res.status(500).send({error: "Internal Server Error", more: e})
   }
 })
 
-
+/**
+ * This endpoint return a partecipant's submission
+ * Authentication is required
+ * @param session_cookie
+ * @returns an array of answers
+ */
 app.get(basepath + "read/" + ":id" + "/partecipants/" + ":pid", async (req, res) =>{ 
   try{
     if(!req.user) res.status(401).send({error: "Not authenticated!"})
@@ -139,6 +156,11 @@ app.get(basepath + "read/" + ":id" + "/partecipants/" + ":pid", async (req, res)
   }
 })
 
+
+/**
+ * This endpoint allow a partecipant to submit her form.
+ * @body json containing the entries
+ */
 app.put(basepath, async (req, res) => {
   try {
     let result = await survey.submit(req.body)  
@@ -148,6 +170,12 @@ app.put(basepath, async (req, res) => {
     return res.status(500).send({error: "Internal Server Error", more: e})
   }
 })
+
+
+
+
+
+
 
 
 /*===== USER APIs =========*/

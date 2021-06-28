@@ -175,7 +175,9 @@ function QuestionEditor(props){
         else
             if(type==="Multiple"){
                 let validAnswers = answers.filter((a) => {return a!==""}).map((a,i) => {return {aid: i+1, text: a, selected: false}})
-                if(validAnswers.length < min || validAnswers.length < max)
+                if(validAnswers.length <=10)
+                    setError("Answers number must be less or equal than 10")
+                else if( validAnswers.length < min || validAnswers.length < max)
                     setError("Answers number must be greater or equal to minimum answer option")
                 else{
                     addQuestion(text, type, validAnswers, min, max, null);
@@ -241,7 +243,7 @@ function QuestionEditor(props){
                         </div>
                     
                     )})}
-                    <Button variant="link" onClick={()=>{setActiveAnswers(i=>i+1)}}>Add an answer</Button>
+                    <Button variant="link" disabled={activeAnswers===10} onClick={()=>{setActiveAnswers(i=>i < 10 ? i+1 : i)}}>Add an answer</Button>
                    
                 
                 </Form.Group> 

@@ -2,17 +2,13 @@ import SurveyViewer from './SurveyViewer'
 import {Col, Container, Button, ButtonGroup} from 'react-bootstrap'
 import {useState, useEffect} from 'react'
 import {useLocation, Redirect} from 'react-router-dom'
-import {fillableSurvey, filledSurvey} from './surveymock'
 import API from '../API'
 
 export default function ResultReader(props){
     const {loggedIn} = props;
 
-    const [survey, setSurvey] = useState(false)
     const [surveys, setSurveys] = useState(false);
     const [index, setIndex] = useState("");
-    const [refreshSurvey, setRefreshSurvey] = useState(true);
-    const [refresh, setRefresh] = useState(false);
     const [refreshPartecipants, setRefreshPartecipants] = useState(false);
     const [error, setError] = useState(false)
     const [partecipants, setPartecipants] = useState(false)
@@ -25,46 +21,48 @@ export default function ResultReader(props){
 
 
     useEffect(() => {  
+        let mounted = true
         if(sid){
             API.getPartecipants(sid).then((p) => {
-                setRefreshPartecipants(false)
-                setPartecipants(p)
-                setIndex(1)
-                setRefresh(true)
+                if(mounted){ 
+                    setRefreshPartecipants(false)
+                    setPartecipants(p)
+                    setIndex(1)
+                }
             })
             .catch(e => {
-                setPartecipants(false)
-                setLoading(false)
-                setError({error: "No partecipants for the selected survey"})
-                setRefreshPartecipants(false)
+                if(mounted){ 
+                    setIndex(false)
+                    setPartecipants(false)
+                    setLoading(false)
+                    setError({error: e.error})
+                    setRefreshPartecipants(false)
+                }
             })
         }
+        return ()=>{mounted=false}
     },[refreshPartecipants, sid])
 
     useEffect(()=>{
-        if(index && partecipants){
+        if(index){
             API.getSubmissionForSurvey(sid, index).then((sub)=>{
                 setSurveys(sub)
-                setRefresh(false)
                 setLoading(false)
             }).catch(e=>{
                 setError({error: e.error})
                 setSurveys(false)
-                setRefresh(false)
             })
             setLoading(false)
         }
-    }, [index])
+    }, [index, sid])
 
     const nextSubmission=()=>{
         setLoading(true)
         setIndex(i => i+1)
-        setRefresh(true);
     }
     const previousSubmission = () => {
         setLoading(true)
         setIndex(i => i > 0 ? i-1 : i);
-        setRefresh(true)
     }
     return (
         <>              

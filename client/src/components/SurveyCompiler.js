@@ -1,7 +1,6 @@
 import SurveyViewer from './SurveyViewer'
 import {useState, useEffect} from 'react'
 import {useLocation, Redirect} from 'react-router-dom'
-import {fillableSurvey} from './surveymock'
 import {Col} from 'react-bootstrap'
 import API from '../API'
 import './components.css'
