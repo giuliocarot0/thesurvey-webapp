@@ -14,7 +14,7 @@ const newSurveyValidator=(req, res, next) =>{
     survey.questions.forEach(q => {
       if(q.qid && q.text) {
           if(q.multiple && q.min && q.max && q.min >= 0 && q.min <= q.max && q.max <= 10) {
-            if(q.answers && q.answers.length >= q.max && q.answers.length <= 10){
+            if(q.answers && q.answers.length > 0 && q.answers.length >= q.max && q.answers.length <= 10){
               q.answers.forEach((a) => {
                 if(!a.aid || !a.text){
                   errors.push({error: "Malformed answer"})
@@ -46,7 +46,25 @@ const newSurveyValidator=(req, res, next) =>{
 
 }
 
+const idValidator = (req, res, next) => {
+  let id = req.params.id
+  let errors = []
+  if(!req.params.pid  || !Number.isInteger(req.params.pid) || !req.params.pid>=0){
+    errors.push({error: "Invalid PartecipantID"})
+  }  
+  if(!Number.isInteger(id) || id <= 0) {
+    errors.push({error: "Invalid SurveyID"})
+  }
+  if(errors.length > 0){
+    req.errors = errors;
+    next();
+  }
+  else{
+    req.errors = false;
+    next();
+  }
 
+}
 
 
 /*===PASSPORT.js MIDDLEWARESS=====*/
@@ -105,13 +123,13 @@ const basepath = "/api/surveys/";
  * @body a json containing survey informations and questions
  * @returns the operation response
  */
-app.post(basepath, newSurveyValidator, async (req, res) => {
+app.post(basepath,/*newSurveyValidator, */ async (req, res) => {
   try{
       
       if(!req.user) return res.status(401).send({error: "Unauthenticated User"})
-      else if(req.errors && req.errors.length > 0){
+      /*else if(req.errors && req.errors.length > 0){
         return res.status(400).send(req.errors)
-      }
+      }*/
       else{
         let response = await survey.new(req.body, req.user.id)
        return res.send({message: "survey successfully created"}) 
@@ -126,13 +144,16 @@ app.post(basepath, newSurveyValidator, async (req, res) => {
  * @param id survey id
  * @returns a survey
  */
-app.get(basepath+":id", async (req,res) => {
+app.get(basepath+":id",idValidator, async (req,res) => {
   try{
-    let result =  await survey.getFromDB(req.params.id)
-    if(!result)
-      return res.status(404).send({error: "Requested survey not found!"})
-    else if (result)
-      return res.status(200).send(result)
+    if(req.error) return res.status(400).send({error: "Invalid Parameters"})
+    else {
+      let result =  await survey.getFromDB(req.params.id)
+      if(!result)
+        return res.status(404).send({error: "Requested survey not found!"})
+      else if (result)
+        return res.status(200).send(result)
+    }
   }
   catch(e){
     console.log(e)
@@ -165,9 +186,10 @@ app.get(basepath, async(req, res) => {
  * @param id survey id
  * @returns partecipant list
  */
-app.get(basepath + "read/" + ":id" + "/partecipants", async (req, res) => {
+app.get(basepath + "read/" + ":id" + "/partecipants",idValidator, async (req, res) => {
   try {
     if(!req.user) res.status(401).send({error: "Not authenticated!"})
+    else if(req.error) return res.status(400).send({error: "Invalid Parameters"})
     else{
       let partecipants = await survey.getPartecipants(req.user.id,req.params.id)
       if(Object.keys(partecipants).length > 0)
@@ -186,9 +208,10 @@ app.get(basepath + "read/" + ":id" + "/partecipants", async (req, res) => {
  * @param session_cookie
  * @returns an array of answers
  */
-app.get(basepath + "read/" + ":id" + "/partecipants/" + ":pid", async (req, res) =>{ 
+app.get(basepath + "read/" + ":id" + "/partecipants/" + ":pid",idValidator, async (req, res) =>{ 
   try{
     if(!req.user) res.status(401).send({error: "Not authenticated!"})
+    else if(req.error) return res.status(400).send({error: "Invalid Parameters"})
     else{
       let submissions = await survey.getSubmissionForSurvey(req.user.id,req.params.id,req.params.pid)
       if(submissions!==false)
