@@ -26,4 +26,4 @@ const createClosedQuestion = (qid, text, min, max, answers) =>{
     return {"multiple":true,"qid":qid,"text":text,"answers":answers,"min":min,"max":max}
 }
 
-module.exports = {fillableSurvey, filledSurvey, createClosedQuestion, createOpenQuestion }
+module.exports = {fillableSurvey, createClosedQuestion, createOpenQuestion }
