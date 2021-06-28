@@ -4,10 +4,10 @@
 ## React Client Application Routes
 
 - Route `/`: list of fillable surveys by an unauthenticated user.
-- Route `/compiler/:sid` : allowsan unauthenticated user to compile a given survey. "sid" is the survey id.
+- Route `/compiler/:sid` : allows an unauthenticated user to compile a given survey. "sid" is the survey id.
 - Route `/dashboard/`: the administrator dashboard lists own surveys and allows administrator to manage them.
 - Route `/reader/:sid` : the results reader. Allows an administrator to check submissions for a given survey. "sid" is the survey id.
-- Route `/create/` : also colled Survey Studio. At this route the administrator can create a new survey.  
+- Route `/create/` : also called Survey Studio. At this route the administrator can create a new survey.  
 - Route `/login/` : is the login page
 
 ## API Server
