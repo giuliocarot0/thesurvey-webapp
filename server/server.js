@@ -6,6 +6,49 @@ const express = require('express');
 const survey = require('./lib/survey')
 const session = require('express-session'); // enable sessions
 
+/*====SURVEY VALIDATION MIDDLEWARE=======*/
+const newSurveyValidator=(req, res, next) =>{
+  let errors = []
+  let survey = req.body;
+  if(survey.title && survey.questions && survey.questions.length > 0){
+    survey.questions.forEach(q => {
+      if(q.qid && q.text) {
+          if(q.multiple && q.min && q.max && q.min >= 0 && q.min <= q.max && q.max <= 10) {
+            if(q.answers && q.answers.length >= q.max && q.answers.length <= 10){
+              q.answers.forEach((a) => {
+                if(!a.aid || !a.text){
+                  errors.push({error: "Malformed answer"})
+                }
+              })
+            }
+            else
+              errors.push({error: "Invalid numbers of answers"})
+          }
+          else if(!q.multiple && q.mandatory===undefined)
+            errors.push({error:"Malformed question"})
+          
+      }
+      else errors.push({error: "Missing informations about question"})
+    })
+  }
+  else{
+     errors.push({error: "Missing informations about survey or no questions into the survey"}) 
+  }
+  if(errors.length > 0){
+    console.log(errors)
+     req.errors = errors;
+     next();
+  }
+  else{
+    req.errors = false;
+    next();
+  }
+
+}
+
+
+
+
 /*===PASSPORT.js MIDDLEWARESS=====*/
 passport.use(new LocalStrategy(
   function(username, password, done) {
@@ -62,10 +105,14 @@ const basepath = "/api/surveys/";
  * @body a json containing survey informations and questions
  * @returns the operation response
  */
-app.post(basepath, async (req, res) => {
+app.post(basepath, newSurveyValidator, async (req, res) => {
   try{
+      
       if(!req.user) return res.status(401).send({error: "Unauthenticated User"})
-      else {
+      else if(req.errors && req.errors.length > 0){
+        return res.status(400).send(req.errors)
+      }
+      else{
         let response = await survey.new(req.body, req.user.id)
        return res.send({message: "survey successfully created"}) 
     }
@@ -170,9 +217,6 @@ app.put(basepath, async (req, res) => {
     return res.status(500).send({error: "Internal Server Error", more: e})
   }
 })
-
-
-
 
 
 
