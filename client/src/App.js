@@ -1,7 +1,7 @@
 import {BrowserRouter as Router, Route, Switch} from 'react-router-dom';
 import {useState, useEffect} from 'react';
 
-import SurveyNavbar from './components/navbar';
+import SurveyNavbar from './components/Navbar';
 import SurveyHome from './components/SurveyHome'
 import SurveyEditor from './components/SurveyEditor'
 import SurveyDashboard from './components/SurveyDashboard'

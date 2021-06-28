@@ -16,7 +16,7 @@ function SurveyNavbar(props){
         </Col>
         <Col md={6} align="right">
         {location.pathname !== "/login"  && <> { !loggedIn? 
-          <Link to="login"> 
+          <Link to="/login"> 
             <Button style={{margin:"5px"}}> {"Login"}</Button>
           </Link> 
           : 
