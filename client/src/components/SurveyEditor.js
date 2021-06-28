@@ -30,6 +30,7 @@ export default function SurveyEditor(props){
 
     const deleteQuestion = (qid)=>{
         let questions2 = questions.filter((q) => {return q.qid !== parseInt(qid)})
+        questions2.sort((a,b)=>{return a.qid - b.qid}).forEach((q,i) => {q.qid = i+1})
         setQuestions(questions2)
     }
     const swapUpQuestion = (qid) =>{
@@ -40,7 +41,8 @@ export default function SurveyEditor(props){
                 qid_t = questions[i-1].qid;
                 questions[i-1].qid = questions[i].qid;
                 questions[i].qid = qid_t;
-                setQuestions(questions.filter((a)=> {return true}))
+                setQuestions([...questions])
+                break;
             }
         }
     }
@@ -52,10 +54,11 @@ export default function SurveyEditor(props){
                 let qid_t = 0
                 qid_t = questions[i+1].qid;
                 questions[i+1].qid = questions[i].qid;
-                questions[i].qid = qid_t;
-                setQuestions(questions.filter((a)=> {return true}))
+                questions[i].qid = qid_t;        
+                setQuestions([...questions])
+                break;
             }
-        }
+        }     
     }
 
     const createSurvey = ()=>{
@@ -99,12 +102,12 @@ export default function SurveyEditor(props){
                         : 
                         <div>
                             <div align="center"><h2>{title}</h2></div>
-                            {questions.sort((a,b)=>{return a.qid-b.qid}).map(q => { return (
+                            {questions.sort((a,b)=>{return a.qid-b.qid}).map((q, i) => { return (
                             <div key={q.qid}>
                                 <div align="right">
                                     <Button variant="outline-secondary" id={q.qid} onClick={(e)=>deleteQuestion(e.target.id)}> Delete</Button>
-                                    <Button variant="outline-secondary" disabled={questions.length === 1 || q.qid === 1 } id={q.qid} onClick={(e)=>swapUpQuestion(e.target.id)}>Up</Button>
-                                    <Button variant="outline-secondary" disabled={questions.length === 1 || q.qid === questions.length } id={q.qid} onClick={(e)=>swapDownQuestion(e.target.id)}> Down</Button>
+                                    <Button variant="outline-secondary" disabled={questions.length === 1 || i  ===  0 } id={i + 1} onClick={(e)=>swapUpQuestion(e.target.id)}>Up</Button>
+                                    <Button variant="outline-secondary" disabled={questions.length === 1 || i + 1 === questions.length } id={i + 1} onClick={(e)=>swapDownQuestion(e.target.id)}> Down</Button>
                                </div>
                                <QuestionViewer questionPreview  question={q}></QuestionViewer>
                             </div>)

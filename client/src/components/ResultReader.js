@@ -23,28 +23,9 @@ export default function ResultReader(props){
     const path = location.pathname.substring(8)
     const sid = parseInt(path)
 
-    useEffect(()=>{
-        if(!sid){
-            setSurveys(false);
-            setRefreshSurvey(false)
-        }
-        else {  
-            if(!survey)
-                API.getSurvey(sid).then((s)=>{
-                    let fs = fillableSurvey(s)
-                    setSurvey(fs)
-                    setRefreshSurvey(false)
-                    setRefresh(true)
-                }).catch(e=>{
-                    setSurvey(false)
-                    setError({error: "Cannot get requested survey"})
-                    setLoading(false)
-                    setRefreshSurvey(false)
-                })  
-    }},[refreshSurvey,sid, survey])
-    
-    useEffect(() => {
-        if(survey && sid){
+
+    useEffect(() => {  
+        if(sid){
             API.getPartecipants(sid).then((p) => {
                 setRefreshPartecipants(false)
                 setPartecipants(p)
@@ -54,26 +35,18 @@ export default function ResultReader(props){
             .catch(e => {
                 setPartecipants(false)
                 setLoading(false)
-                setError({error: "cannot retreive survey partecipants"})
+                setError({error: "No partecipants for the selected survey"})
                 setRefreshPartecipants(false)
             })
         }
-    },[refreshPartecipants, survey, sid])
+    },[refreshPartecipants, sid])
 
     useEffect(()=>{
-        if(survey && index && partecipants){
+        if(index && partecipants){
             API.getSubmissionForSurvey(sid, index).then((sub)=>{
-                let fsurveys = filledSurvey(survey, sub, partecipants[index-1].name)
-                if(fsurveys){ 
-                    setSurveys(fsurveys)
-                    setRefresh(false)
-                    setLoading(false)
-                }
-                else {
-                    setSurveys(false)
-                    setRefresh(false)
-                    setError({error: "Cannot create render suitable survey"})
-                }
+                setSurveys(sub)
+                setRefresh(false)
+                setLoading(false)
             }).catch(e=>{
                 setError({error: e.error})
                 setSurveys(false)
@@ -81,7 +54,7 @@ export default function ResultReader(props){
             })
             setLoading(false)
         }
-    }, [survey, refresh, sid, index, partecipants])
+    }, [index])
 
     const nextSubmission=()=>{
         setLoading(true)
@@ -95,10 +68,10 @@ export default function ResultReader(props){
     }
     return (
         <>              
-        {!loggedIn && <Redirect to="/login"/>}
+        {!loggedIn && <Redirect to="/"></Redirect>}
         <Container>
             <Col className="theviewer" md={{ span: 6, offset: 3 }}> 
-             {error && <h3>{error.error}</h3> }
+            {error && <h3>{error.error}</h3> }
             {!loading? <> {
                 surveys && <>
                     <Col md={4}>  

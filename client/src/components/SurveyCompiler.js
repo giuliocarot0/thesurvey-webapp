@@ -25,7 +25,7 @@ export default function SurveyCompiler(props){
         else {   
             API.getSurvey(sid)
             .then(s => {
-                setSurvey(fillableSurvey(s)) 
+                setSurvey(s) 
                 setRefresh(false)
 
             })  
@@ -77,7 +77,6 @@ export default function SurveyCompiler(props){
                 }
             }
             else{
-                console.log(q.answer)
                 if(q.answer.length === 0 && q.mandatory) errors.push(q.qid)
                 else vanswers.push({question_id: q.qid, text: q.answer})
             }
@@ -87,7 +86,8 @@ export default function SurveyCompiler(props){
             setLoading(false)
         }
         else {
-            let filledForm = {survey_id : survey.sid, user: survey.user, entries: vanswers}
+            let filledForm = {survey_id : survey.id, user: survey.user, entries: vanswers}
+            console.log(filledForm)
             API.submitEntries(filledForm).then(res => {
                 setLoading(false)
                 setSubmitted(true)

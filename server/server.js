@@ -134,6 +134,7 @@ app.get(basepath + "read/" + ":id" + "/partecipants/" + ":pid", async (req, res)
     }
   }
   catch(e){
+    console.log(e)
     return res.status(500).send({error: "Internal Server Error", more: e})
   }
 })

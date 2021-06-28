@@ -15,10 +15,8 @@ exports.create = (b)=>{
 
 exports.new = async (survey, uid)=>{
     try {
-        console.log(survey)
         let survey_id = await addIntoSurvey(survey, uid);
         if (!survey_id) throw new Exception()
-        console.log(survey)
         for(let q in survey.questions){
             await addQuestion(survey.questions[q], survey_id)
             for(let a in survey.questions[q].answers){
@@ -106,7 +104,7 @@ exports.getPartecipants = ((uid, sid) => {
 
 const hasPartecipated = ((uid, sid, pid) => {
     return new Promise ((resolve, reject) => {
-        let query = "SELECT partecipant_id \
+        let query = "SELECT partecipant_id, name\
                     FROM PARTECIPANT P, SURVEY S  \
                     WHERE S.survey_id = P.survey_id AND S.owner = ? AND S.survey_id = ? AND P.partecipant_id = ?"
         db.get(query, [uid, sid, pid], (err, res) => {
@@ -140,11 +138,19 @@ exports.getMyList = (uid)=>{
     })
 }
 
-exports.getFromDB =  (id) => {
+exports.getFromDB =  (id, uid) => {
     return new Promise((resolve, reject) =>{
     /*get the survey from DB*/
-    let query1 = "SELECT * FROM SURVEY WHERE survey_id = ?";
-    let row = db.get(query1, [id],(err, row) => {
+    let query = "", param = []
+    if(!uid){
+         query = "SELECT * FROM SURVEY WHERE survey_id = ?";
+         param = [id]
+    }
+    else {
+         query = "SELECT * FROM SURVEY WHERE survey_id = ? AND owner = ?";
+         param = [id, uid]
+    }
+    db.get(query,param,(err, row) => {
     if(err) reject(err)
     else if(row){
             let survey = this.create(row);
@@ -178,7 +184,7 @@ const getQuestionsFromDB = async (sid) => {
     let quest =  await questions;
     for(q in quest) {
         if(quest[q].multiple){
-            quest[q].answers = await getAnswersFromDB(quest[q].id, sid);
+            quest[q].answers = await getAnswersFromDB(quest[q].qid, sid);
         }
     }
     return quest;
@@ -191,7 +197,7 @@ const getAnswersFromDB = async (qid, sid) => {
         db.all(ans_query, [qid, sid], (err, result) => {
             if(err)
                 reject(err)
-            resolve(result);
+            resolve(result.map((a)=>{return {aid: a.answer_id, text: a.text}}));
         })
     })
 }
@@ -257,14 +263,30 @@ const addPartecipant = (sid,name) => {
 }
 
 
+const filledSurvey = (s, a, p) => {
+    console.log(s)
+    for(let e in a){
+        if(a[e].text){
+            s.questions[a[e].question_id - 1].answer = a[e].text;
+        }
+        else{ 
+            s.questions[a[e].question_id - 1 ].answers[a[e].answer_id  - 1].selected = true;           
+        }
+    }
+    s.user = p;
+    return s;
+}
+
 exports.getSubmissionForSurvey  = async (uid,sid,pid) =>{
-        let partecipated = await hasPartecipated(uid, sid, pid)
+        let partecipated = await hasPartecipated(uid, sid, pid)        
+        let survey = await this.getFromDB(sid, uid) 
+
         let open_entries = await getOpenEntries(sid,uid,pid)
         let closed_entries = await getClosedEntries(sid, uid, pid)
        // now creates arrays of arrays to ensure direct access to questions and eventually answers
        return new Promise((resolve, reject) => {
-           if(!partecipated) resolve(false)
-           else if (open_entries && closed_entries) resolve(open_entries.concat(closed_entries))
+           if(!partecipated ) resolve(false)
+           else if ( survey && open_entries && closed_entries) resolve(filledSurvey(survey, open_entries.concat(closed_entries), partecipated.name))
            else reject({error: "Error retreiving entries form DB"})
        })
 }
@@ -274,7 +296,6 @@ const getOpenEntries = async (sid, uid, partecipant) => {
         let open_entries = "SELECT E.question_id, E.text  \
                               FROM OPEN_ENTRY E, SURVEY S \
                               WHERE S.survey_id = E.survey_id AND E.survey_id = ? AND S.owner = ? AND E.partecipant = ?"
-        console.log(sid)
         db.all(open_entries, [sid, uid, partecipant], (err, result) => {
             if(err) reject(err)
             else {
