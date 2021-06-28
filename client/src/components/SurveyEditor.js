@@ -1,5 +1,5 @@
 import './components.css'
-import {Col, Container, Form, Button, Row, Alert} from 'react-bootstrap'
+import {Col, Container, Form, Button, Row} from 'react-bootstrap'
 import {useState} from 'react'
 import {Link, Redirect} from 'react-router-dom'
 import {createOpenQuestion, createClosedQuestion} from './surveymock'
@@ -31,6 +31,7 @@ export default function SurveyEditor(props){
     const deleteQuestion = (qid)=>{
         let questions2 = questions.filter((q) => {return q.qid !== parseInt(qid)})
         questions2.sort((a,b)=>{return a.qid - b.qid}).forEach((q,i) => {q.qid = i+1})
+        setQuestionCounter(i=>i-1)
         setQuestions(questions2)
     }
     const swapUpQuestion = (qid) =>{
@@ -78,9 +79,9 @@ export default function SurveyEditor(props){
 
     return (
         <> 
-            {!loggedIn && <Redirect to="/login"/>}
             {loading ? <LoadingComponent></LoadingComponent>
             :<>
+            {!loggedIn && <Redirect to="/login"/>}
             <Container>
                 {(error || successful) && 
                 <Col className="theviewer" align="center" md={{ span: 6, offset: 3 }}>
@@ -175,7 +176,7 @@ function QuestionEditor(props){
         else
             if(type==="Multiple"){
                 let validAnswers = answers.filter((a) => {return a!==""}).map((a,i) => {return {aid: i+1, text: a, selected: false}})
-                if(validAnswers.length <=10)
+                if(validAnswers.length > 10)
                     setError("Answers number must be less or equal than 10")
                 else if( validAnswers.length < min || validAnswers.length < max)
                     setError("Answers number must be greater or equal to minimum answer option")
@@ -191,7 +192,7 @@ function QuestionEditor(props){
     }
     return(
         <div className="editor">
-            { error ? <Alert variant="danger" fade={false}> <Alert.Heading>{error}</Alert.Heading> </Alert> : ""}
+            { error ? <div align="center"> <font color="red">{error}</font> </div> : ""}
             <Form>
                 <h4>Question text <font color="red">*</font></h4>
                 <Form.Group>

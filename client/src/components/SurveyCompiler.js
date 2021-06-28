@@ -1,4 +1,6 @@
 import SurveyViewer from './SurveyViewer'
+import LoadingComponent from './LoadingComponent'
+
 import {useState, useEffect} from 'react'
 import {useLocation, Redirect} from 'react-router-dom'
 import {Col} from 'react-bootstrap'
@@ -6,37 +8,38 @@ import API from '../API'
 import './components.css'
 export default function SurveyCompiler(props){
     const [survey, setSurvey] = useState(false);
-    const [refresh, setRefresh] = useState(true);
     const [error, setError] = useState(false);
     const [submitted, setSubmitted] = useState(false);
     const [validationError, setValidationError] = useState(false);
-    const [loading, setLoading] = useState(false);
+    const [loading, setLoading] = useState(true);
     const location = useLocation();
     const {loggedIn} = props;
     const path = location.pathname.substring(10)
     const sid = parseInt(path)
 
     useEffect(()=>{
+        const getSurvey = async (sid) => {
+            try {
+            let s = await API.getSurvey(sid)
+                setSurvey(s) 
+                setLoading(false)
+            }catch(e){
+                setError("Cannot get survey")
+                setSurvey(false)
+            }
+        }
+
         if(!sid){
             setSurvey(false);
-            setRefresh(false)
+            setLoading(false)
         }
         else {   
-            API.getSurvey(sid)
-            .then(s => {
-                setSurvey(s) 
-                setRefresh(false)
+            getSurvey(sid)                
+            setLoading(false)
 
-            })  
-            .catch(err => {
-                setError(err.error)
-                setSurvey(false)
-                setRefresh(false)
-            })       
-           
-            }
+        }
                   
-    },[refresh,sid])
+    },[sid])
 
     const onAnswerChange = (qid, ansid, ansselected, text)=>{
         for(let q in survey.questions) {
@@ -56,6 +59,22 @@ export default function SurveyCompiler(props){
     }
 
     const validateAndSubmit = () =>{
+        const submit = async(filledForm) =>{
+            try{
+                await API.submitEntries(filledForm)
+                setSubmitted(true)
+                setError(false)
+                setLoading(false)   
+
+            }
+            catch(e){
+                setSubmitted(false)
+                setError(true)
+                setLoading(false)   
+            }
+        }
+        
+
         setLoading(true);
         //validation
         let vanswers = []
@@ -76,7 +95,7 @@ export default function SurveyCompiler(props){
                 }
             }
             else{
-                if(q.answer.length === 0 && q.mandatory) errors.push(q.qid)
+                if(q.mandatory && q.answer.length === 0) errors.push(q.qid)
                 else vanswers.push({question_id: q.qid, text: q.answer})
             }
         })
@@ -86,30 +105,17 @@ export default function SurveyCompiler(props){
         }
         else {
             let filledForm = {survey_id : survey.id, user: survey.user, entries: vanswers}
-            console.log(filledForm)
-            API.submitEntries(filledForm).then(res => {
-                setLoading(false)
-                setSubmitted(true)
-                setError(false)
-            })
-            .catch(err => {
-                setLoading(false)
-                setError(err.error)
-            })
-        }        
+            submit(filledForm)
+        }      
     }
 
-    return (<>
+    return (loading? <LoadingComponent></LoadingComponent> :
+        submitted ? <Redirect to="/"></Redirect> : <>
         {loggedIn && <Redirect to="/dashboard"/>}
-            {loading && "LOADING..." } 
+             
             {(validationError || error) && !loading && !submitted &&
                 <Col className="theviewer" align="center">
                     <font color="red" >{!error ? "Validation Error, please check your entries before submit" : error}</font>
-                </Col>
-            }
-            {submitted &&
-                <Col className="theviewer" align="center">
-                    <font color="green" >{"Your submission has been successfully recorded"}</font>
                 </Col>
             }
             {survey && !error && !loading &&<>

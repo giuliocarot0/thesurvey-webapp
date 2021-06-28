@@ -14,27 +14,25 @@ export default function SurveyDashboard(props){
     
 
     useEffect(()=>{
-        let mounted = true
-        API.getSurveyList()
-            .then((list) => {     
-                if(mounted){          
-                    setMySurveys(list)
-                    setLoading(false)
-                }
-            })
-            .catch((err) => {
-                if(mounted){
-                    setError(false)
-                    setLoading(false);
-                }
-            })
-        return ()=>{mounted=false}
+        const getList = async ()=>{
+            try{
+                let list =  await API.getSurveyList()
+                setMySurveys(list)
+                setLoading(false)
+            }
+            catch(e){
+                setError(false)
+                setLoading(false);
+            }
+        }
+        if(loading)
+            getList()
     },[loading])
 
     return (<>
-        {!loggedIn && <Redirect to="/login"/>}
         {loading ? <LoadingComponent></LoadingComponent> :
         <>
+        {!loggedIn && <Redirect to="/login"/>}
         <Container>
              <Col className="theviewer" align="center" md={{ span: 6, offset: 3 }}> 
                  <h4>{loggedIn.name}'s Dashboard</h4>

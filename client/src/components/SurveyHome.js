@@ -12,31 +12,28 @@ export default function SurveyHome(props){
     const [error, setError] = useState(false)
     
     useEffect(()=>{
-        let mounted = true
-        API.getSurveyList()
-            .then((l) => {
-                if(mounted){
-                    setSurveys(l)
-                    setLoading(false)
-                    setError(false)
-                }
-            })
-            .catch((e) => {
-                if(mounted){
+        const getList = async ()=>{
+            try{
+                let l = await API.getSurveyList()
+                setSurveys(l)
+                setLoading(false)
+                setError(false)
+            }
+            catch(e) {
                     setError(e)
                     setSurveys(false)
                     setLoading(false)
-                    }
-                })
-        
-        return ()=>{mounted=false};
+                }
+            }
+        if(loading)
+            getList()
     },[loading])
 
    
     return (<>
-        {loggedIn && <Redirect to="/dashboard"/>}
 
-        {loading ? <LoadingComponent></LoadingComponent>:<>
+    {loading ? <LoadingComponent></LoadingComponent>:<>
+            {loggedIn && <Redirect to="/dashboard"/>}
             <Container className="home">
              {surveys ? 
                  <Col className="theviewer" align="center" md={{ span: 6, offset: 3 }}> 
@@ -46,7 +43,7 @@ export default function SurveyHome(props){
                 <Col className="theviewer list" md={{ span: 9, offset: 0 }}>
                     {error && <h3>{error.error}</h3> }
 
-                    {surveys ? <>
+                    {surveys && surveys.length>0? <>
                         {surveys.map((s, i) =>
                         <div key={s.id}>  
                             <Row>
