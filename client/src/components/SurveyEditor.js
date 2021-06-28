@@ -2,7 +2,6 @@ import './components.css'
 import {Col, Container, Form, Button, Row} from 'react-bootstrap'
 import {useState} from 'react'
 import {Link, Redirect} from 'react-router-dom'
-import {createOpenQuestion, createClosedQuestion} from './surveymock'
 import API from '../API'
 import QuestionViewer from './QuestionViewer'
 import LoadingComponent from './LoadingComponent'
@@ -18,6 +17,14 @@ export default function SurveyEditor(props){
     const [successful, setSuccessful] = useState(false)
     const [error, setError] = useState(false)
     const [loading, setLoading] = useState(false)
+
+    const createOpenQuestion = (qid, text, mandatory) =>{
+        return {"multiple":false,"qid":qid,"text":text,"mandatory":mandatory, answer:""}
+    }
+    
+    const createClosedQuestion = (qid, text, min, max, answers) =>{
+        return {"multiple":true,"qid":qid,"text":text,"answers":answers,"min":min,"max":max}
+    }
 
     const createNewQuestion = (text, type, answers, min, max, mandatory)=>{
         if(type==="Open") 
