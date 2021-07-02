@@ -95,7 +95,7 @@ export default function SurveyCompiler(props){
                 }
             }
             else{
-                if(q.mandatory && q.answer.length === 0) errors.push(q.qid)
+                if(q.mandatory && (!q.answer || q.answer.length === 0)) errors.push(q.qid)
                 else vanswers.push({question_id: q.qid, text: q.answer})
             }
         })
