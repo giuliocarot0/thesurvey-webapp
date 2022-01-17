@@ -1,5 +1,5 @@
-# Exam #1234: "Questionario"
-## Student: s290251 CAROTA GIULIO 
+# The Survey WebAPP
+## CAROTA GIULIO 
 
 ## React Client Application Routes
 
@@ -217,7 +217,3 @@
 
 ![Screenshot](./img/screenshot.png)
 
-## Users Credentials
-
-- john.doe@polito.it, Userpassword
-- aw.2021@polito.it, Userpassword
